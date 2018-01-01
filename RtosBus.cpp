@@ -79,12 +79,15 @@ class Logger : public VerticleTask
             INFO("---|------------|--------|-------");
             for (AbstractVerticle *v = first(); v != 0; v = v->next())
             {
-                VerticleTask *vt = (VerticleTask *)v;
-                INFO(" %c | %10s |  %5d | %3d",
-                     taskState(eTaskGetState(vt->_taskHandle)),
-                     vt->name(),
-                     uxTaskGetStackHighWaterMark(vt->_taskHandle),
-                     uxTaskPriorityGet(vt->_taskHandle));
+                //                if (v->isTask())
+                {
+                    VerticleTask *vt = (VerticleTask *)v;
+                    INFO(" %c | %10s |  %5d | %3d",
+                         taskState(eTaskGetState(vt->_taskHandle)),
+                         vt->name(),
+                         uxTaskGetStackHighWaterMark(vt->_taskHandle),
+                         uxTaskPriorityGet(vt->_taskHandle));
+                }
             }
         }
     }
@@ -105,6 +108,7 @@ class Led : public VerticleTask
     {
         gpio_enable(_gpio, GPIO_OUTPUT);
         gpio_enable(_gpio2, GPIO_OUTPUT);
+        vTaskDelay(1000);
         VerticleTask::start();
         //        eb.consumer("LED", [this](Cbor &msg) {});
     }
@@ -112,12 +116,80 @@ class Led : public VerticleTask
     {
         while (true)
         {
-            wait(500);
+            wait(100);
             gpio_write(_gpio, 1);
             gpio_write(_gpio2, 0);
-            wait(500);
+            wait(100);
             gpio_write(_gpio, 0);
             gpio_write(_gpio2, 1);
+        }
+    }
+};
+
+// Co-routine to be created.
+void vFlashCoRoutine(CoRoutineHandle_t xHandle, UBaseType_t uxIndex)
+{
+    crSTART(xHandle);
+    for (;;)
+    {
+        crDELAY(xHandle, 1000);
+        INFO(" coroutine running");
+    }
+    crEND();
+}
+
+class VerticleCoRoutine : public AbstractVerticle
+{
+    char *_name;
+
+  public:
+    VerticleCoRoutine(const char *name) : AbstractVerticle()
+    {
+        _name = new char[strlen(name) + 1];
+        strcpy(_name, name);
+    }
+    const char *name()
+    {
+        return _name;
+    }
+    static void run(CoRoutineHandle_t xHandle, UBaseType_t uxIndex)
+    {
+        crSTART(xHandle);
+        for (;;)
+        {
+            crDELAY(xHandle, 1000);
+            INFO(" coroutine2 running");
+        }
+        crEND();
+    }
+    void start()
+    {
+        xCoRoutineCreate(run, 0, 125);
+    }
+    void stop()
+    {
+    }
+    void onMessage(Cbor &msg)
+    {
+    }
+    bool isTask()
+    {
+        return false;
+    }
+};
+
+class CoRoutineTask : public VerticleTask
+{
+  public:
+    CoRoutineTask(const char *name)
+        : VerticleTask(name, true, 256, 1)
+    {
+    }
+    void run()
+    {
+        while (true)
+        {
+            vCoRoutineSchedule();
         }
     }
 };
@@ -196,10 +268,17 @@ class TelnetServer : public VerticleTask
 extern "C" void user_init(void)
 {
 
-    uart_set_baud(0, 115200);
+    uart_set_baud(0, 921600);
     printf("SDK version:%s\n", sdk_system_get_sdk_version());
 
     (new Logger("logger", true, 256, 20))->start();
-    (new Led("LED", true, 200, 1))->start();
+    VerticleTask* vt = new Led("LED", true, 512, 2);
+    INFO(" VT created ");
+    vt->print();
+    vt->start();
     (new TelnetServer("telnetd"))->start();
+    xCoRoutineCreate(vFlashCoRoutine, 0, 125);
+    for(int i=0;i<20;i++)
+    (new VerticleCoRoutine("cor2"))->start();
+    (new CoRoutineTask("CoRout"))->start();
 }

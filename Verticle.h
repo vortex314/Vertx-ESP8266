@@ -5,6 +5,7 @@
 #include <task.h>
 #include <timers.h>
 #include <queue.h>
+#include <croutine.h>
 #include "esp/uart.h"
 #include "espressif/esp_common.h"
 
@@ -20,6 +21,7 @@ class AbstractVerticle : public LinkedList<AbstractVerticle>
     virtual void start() = 0;
     virtual void stop() = 0;
     virtual void onMessage(Cbor &msg) = 0;
+    virtual bool isTask() = 0;
     //    virtual void onTimer() = 0;
     //   virtual void onInterrupt() = 0;
 };
@@ -52,13 +54,28 @@ class VerticleTask : public AbstractVerticle
 
     void notify(Notification n);
     uint32_t wait(uint32_t time);
+    bool isTask() { return true; };
 
     static void handler(void *p);
 
     static void timerHandler(TimerHandle_t th);
+    void print();
 };
 
 typedef void (AbstractVerticle::*MethodHandler)(Cbor &);
 typedef void (*StaticHandler)(Cbor &);
+
+class VerticleRoutine : public AbstractVerticle
+{
+    char *_name;
+
+  public:
+    VerticleRoutine(const char *name);
+    const char *name();
+    virtual void start();
+    virtual void onMessage(Cbor &msg);
+    void stop(){};
+    uint32_t newEvent();
+};
 
 #endif

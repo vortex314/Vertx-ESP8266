@@ -7,7 +7,7 @@ PROGRAM_INC_DIR=. ../esp-open-rtos/include ../Common ../Ebos ../ArduinoJson
 ESPBAUD=921600
 TTY ?= USB0
 SERIAL_PORT ?= /dev/tty$(TTY)
-SERIAL_BAUD = 115200
+SERIAL_BAUD = 921600
 LIBS= m hal gcc
 PROGRAM_CFLAGS= -DESP8266_OPEN_RTOS 
 

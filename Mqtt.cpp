@@ -42,27 +42,22 @@ static void topic_received(mqtt_message_data_t *md)
     INFO(" MQTT RXD %s : %s ", topic.c_str(), payload.c_str());
 }
 
-Mqtt::Mqtt(const char *name) : Actor(name){};
+Mqtt::Mqtt(const char *name) : VerticleTask(name, true, 1024, 5){};
 
-void Mqtt::setup()
+void Mqtt::start()
 {
     mqtt_network_new(&_network);
     memset(_mqtt_client_id, 0, sizeof(_mqtt_client_id));
     strcpy(_mqtt_client_id, "ESP-");
     strcat(_mqtt_client_id, get_my_id());
-    eb.onEvent(_wifi, EB_UID_ANY).call(this);
-    uid.add("waitWifiConnected");
-    uid.add("waitMqttConnected");
-    uid.add("mqttConnected");
-    uid.add("mqttDisconnected");
-    state(H("waitWifiConnected"));
 };
 
 #define STATE_EVENT(x, y) (H(x) + (H(y) << 16))
 #define STATE_EVENT_UID(x, y) ((x) + ((y) << 16))
 
-void Mqtt::onEvent(Cbor &msg)
+void Mqtt::onMessage(Cbor &msg)
 {
+    /*
     PT_BEGIN();
 WAIT_WIFI:
 {
@@ -108,5 +103,5 @@ CONNECT_MQTT:
 }
     PT_END();
     goto WAIT_WIFI;
-    goto CONNECT_MQTT;
+    goto CONNECT_MQTT;*/
 }

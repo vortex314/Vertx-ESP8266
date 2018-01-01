@@ -1,8 +1,7 @@
 #ifndef _MQTT_H_
 #define _MQTT_H_
 
-#include <Actor.h>
-#include <EventBus.h>
+#include <Verticle.h>
 #include <FreeRTOS.h>
 #include <ssid_config.h>
 #include <task.h>
@@ -14,7 +13,7 @@ extern "C" {
 #include <paho_mqtt_c/MQTTESP8266.h>
 };
 
-class Mqtt : public Actor
+class Mqtt : public VerticleTask
 {
   int _ret = 0;
   uint8_t _status = 0;
@@ -29,8 +28,9 @@ class Mqtt : public Actor
 
 public:
   Mqtt(const char *name);
-  void setup();
-  void onEvent(Cbor &msg);
+  void start();
+  void stop();
+  void onMessage(Cbor &msg);
   void setWifi(uid_t wifi) { _wifi = wifi; };
 };
 #endif
