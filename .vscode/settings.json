@@ -1,0 +1,9 @@
+{
+    "window.zoomLevel": -1,
+    "editor.formatOnSave": true,
+    "workbench.colorTheme": "Monokai",
+    "C_Cpp.clang_format_sortIncludes": false,
+    "files.associations": {
+        "esp_common.h": "c"
+    }
+}

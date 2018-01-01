@@ -1,0 +1,95 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": [
+                "/usr/include",
+                "/usr/local/include",
+                "${workspaceRoot}"
+            ],
+            "defines": [],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "/usr/include",
+                    "/usr/local/include",
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            },
+            "macFrameworkPath": [
+                "/System/Library/Frameworks",
+                "/Library/Frameworks"
+            ]
+        },
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceRoot}",
+                "/home/lieven/workspace/esp-open-sdk/crosstool-NG/.build/src/gcc-4.8.5/gcc/ginclude/",
+                "/home/lieven/workspace/esp-open-rtos/include",
+                "/home/lieven/workspace/esp-open-rtos/extras",
+                "/home/lieven/workspace/esp-open-rtos/lwip/lwip/src/include/",
+                "/home/lieven/workspace/esp-open-rtos/include",
+                "/home/lieven/workspace/esp-open-rtos/FreeRTOS/Source/include",
+                "/home/lieven/workspace/esp-open-rtos/FreeRTOS/Source/portable/esp8266",
+                "/home/lieven/workspace/esp-open-rtos/libc/xtensa-lx106-elf/include",
+                "/home/lieven/workspace/esp-open-rtos/core/include",
+                "/home/lieven/workspace/esp-open-rtos/open_esplibs/include",
+                "/home/lieven/workspace/esp-open-rtos/lwip/include",
+                "/home/lieven/workspace/esp-open-rtos/lwip/lwip/src/include/ipv4",
+                "/home/lieven/workspace/esp-open-rtos/lwip/lwip/src/include/posix",
+                "/home/lieven/workspace/esp-open-rtos/lwip/lwip/src/include/lwip",
+                "/home/lieven/workspace/esp-open-rtos/lwip/lwip/src/include",
+                "/home/lieven/workspace/Common"
+            ],
+            "defines": [],
+            "intelliSenseMode": "clang-x64",
+            "browse": {
+                "path": [
+                    "${workspaceRoot}",
+                    "/home/lieven/workspace/esp-open-rtos/include",
+                    "/home/lieven/workspace/esp-open-rtos/extras",
+                    "/home/lieven/workspace/esp-open-rtos/lwip/lwip/src/include/",
+                    "/home/lieven/workspace/esp-open-rtos/include",
+                    "/home/lieven/workspace/esp-open-rtos/FreeRTOS/Source/include",
+                    "/home/lieven/workspace/esp-open-rtos/FreeRTOS/Source/portable/esp8266",
+                    "/home/lieven/workspace/esp-open-rtos/libc/xtensa-lx106-elf/include",
+                    "/home/lieven/workspace/esp-open-rtos/core/include",
+                    "/home/lieven/workspace/esp-open-rtos/open_esplibs/include",
+                    "/home/lieven/workspace/esp-open-rtos/lwip/include",
+                    "/home/lieven/workspace/esp-open-rtos/lwip/lwip/src/include/ipv4",
+                    "/home/lieven/workspace/esp-open-rtos/lwip/lwip/src/include/posix",
+                    "/home/lieven/workspace/esp-open-rtos/lwip/lwip/src/include/lwip",
+                    "/home/lieven/workspace/esp-open-rtos/lwip/lwip/src/include",
+                    "/home/lieven/workspace/Common",
+                    "/home/lieven/workspace/Ebos"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        },
+        {
+            "name": "Win32",
+            "includePath": [
+                "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include",
+                "${workspaceRoot}"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE"
+            ],
+            "intelliSenseMode": "msvc-x64",
+            "browse": {
+                "path": [
+                    "C:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include/*",
+                    "${workspaceRoot}"
+                ],
+                "limitSymbolsToIncludedHeaders": true,
+                "databaseFilename": ""
+            }
+        }
+    ],
+    "version": 3
+}
