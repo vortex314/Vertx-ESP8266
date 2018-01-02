@@ -1,4 +1,4 @@
-# esp8266-ebos
+# vertx-esp8266
 
 The purpose is to have a framework for small embedded devices that have the ease of integration and development
 

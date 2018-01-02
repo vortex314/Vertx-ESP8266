@@ -1,11 +1,13 @@
 
 #include <Mqtt.h>
 
-#define MQTT_HOST ("limero.ddns.net")
+#define MQTT_HOST ("test.mosquitto.org")
 #define MQTT_PORT 1883
 
 #define MQTT_USER NULL
 #define MQTT_PASS NULL
+
+#define PUB_MSG_LEN 20
 
 static const char *get_my_id(void)
 {
@@ -42,39 +44,36 @@ static void topic_received(mqtt_message_data_t *md)
     INFO(" MQTT RXD %s : %s ", topic.c_str(), payload.c_str());
 }
 
-Mqtt::Mqtt(const char *name) : VerticleTask(name, true, 1024, 5){};
+Mqtt::Mqtt(const char *name) : VerticleTask(name, 512, 1){
 
-void Mqtt::start()
+                               };
+
+void Mqtt::run()
 {
     mqtt_network_new(&_network);
     memset(_mqtt_client_id, 0, sizeof(_mqtt_client_id));
     strcpy(_mqtt_client_id, "ESP-");
     strcat(_mqtt_client_id, get_my_id());
-};
+    Str topicAlive(30);
+    topicAlive = "src/";
+    topicAlive += get_my_id();
+    topicAlive += "/alive";
+    int ret = 0;
+    INFO(" clientId : %s , topic alive : %s", _mqtt_client_id, topicAlive.c_str());
 
-#define STATE_EVENT(x, y) (H(x) + (H(y) << 16))
-#define STATE_EVENT_UID(x, y) ((x) + ((y) << 16))
-
-void Mqtt::onMessage(Cbor &msg)
-{
-    /*
-    PT_BEGIN();
-WAIT_WIFI:
-{
-    PT_YIELD_UNTIL(eb.isEvent(_wifi, H("connected")));
-};
-CONNECT_MQTT:
-{
     while (true)
     {
-        _ret = mqtt_network_connect(&_network, MQTT_HOST, MQTT_PORT);
-        if (_ret)
+        wait(5000);
+        INFO("%s: started", __func__);
+        INFO("%s: (Re)connecting to MQTT server %s ... ", __func__, MQTT_HOST);
+        ret = mqtt_network_connect(&_network, MQTT_HOST, MQTT_PORT);
+        if (ret)
         {
-            ERROR(" MQTT connection failed ");
-            timeout(1000);
-            PT_YIELD_UNTIL(eb.isTimeout());
+            INFO("error: %d", ret);
+            taskYIELD();
             continue;
         }
+        INFO("done");
         mqtt_client_new(&_client, &_network, 5000, _mqtt_buf, 100, _mqtt_readbuf, 100);
 
         _data.willFlag = 0;
@@ -84,24 +83,45 @@ CONNECT_MQTT:
         _data.password.cstring = MQTT_PASS;
         _data.keepAliveInterval = 10;
         _data.cleansession = 0;
-        INFO("MQTT connecting ... ");
+        INFO("Send MQTT connect ... ");
         _ret = mqtt_connect(&_client, &_data);
         if (_ret)
         {
-            ERROR("error: %d", _ret);
-            timeout(1000);
-            PT_YIELD_UNTIL(eb.isTimeout());
+            INFO("error: %d", _ret);
             mqtt_network_disconnect(&_network);
-            state(H("disconnected"));
+            taskYIELD();
+            continue;
         }
-        else
-        {
-            state(H("connected"));
-        }
+        INFO("done");
         mqtt_subscribe(&_client, "#", MQTT_QOS1, topic_received);
+
+        while (true)
+        {
+            char msg[PUB_MSG_LEN - 1] = "\0";
+            strcpy(msg, "alive");
+            uint32_t n = wait(1000);
+
+            INFO("got message to publish");
+            mqtt_message_t message;
+            message.payload = msg;
+            message.payloadlen = strlen(msg);
+            message.dup = 0;
+            message.qos = MQTT_QOS1;
+            message.retained = 0;
+            ret = mqtt_publish(&_client, topicAlive.c_str(), &message);
+            if (ret != MQTT_SUCCESS)
+            {
+                INFO("error while publishing message: %d", ret);
+                break;
+            }
+
+            _ret = mqtt_yield(&_client, 1000);
+            if (_ret == MQTT_DISCONNECTED)
+                break;
+        }
+
+        INFO("Connection dropped, request restart");
+        mqtt_network_disconnect(&_network);
+        taskYIELD();
     }
-}
-    PT_END();
-    goto WAIT_WIFI;
-    goto CONNECT_MQTT;*/
 }

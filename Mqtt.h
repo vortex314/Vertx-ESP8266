@@ -1,7 +1,7 @@
 #ifndef _MQTT_H_
 #define _MQTT_H_
 
-#include <Verticle.h>
+#include <vertx.h>
 #include <FreeRTOS.h>
 #include <ssid_config.h>
 #include <task.h>
@@ -28,9 +28,7 @@ class Mqtt : public VerticleTask
 
 public:
   Mqtt(const char *name);
-  void start();
-  void stop();
-  void onMessage(Cbor &msg);
+  void run();
   void setWifi(uid_t wifi) { _wifi = wifi; };
 };
 #endif

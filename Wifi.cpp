@@ -1,50 +1,69 @@
 
+#include <vertx.h>
 #include <Wifi.h>
 
-Wifi::Wifi(const char *name) : Actor(name){};
+Wifi::Wifi(const char *name) : VerticleTask(name,384,6){};
 
-void Wifi::setup()
+void Wifi::run()
 {
-    ZERO(config);
+    
+    Address myAddress("src/wifi");
+
+    Cbor connected(10);
+    connected.addKeyValue(UID.add("connected"),true);
+
+    while (true)
+    {
+          uint8_t retries = 30;
+            uint8_t status = 0;
+     ZERO(config);
     strcpy((char *)config.ssid, WIFI_SSID);
     strcpy((char *)config.password, WIFI_PASS);
     INFO("WiFi: connecting to WiFi\n\r");
     sdk_wifi_set_opmode(STATION_MODE);
     sdk_wifi_station_set_config(&config);
-    timeout(1000);
-    state(uid.add("disconnected"));
-    uid.add("connected");
-};
 
-void Wifi::onEvent(Cbor &msg)
-{
-    bool stateChanged = false;
-    status = sdk_wifi_station_get_connect_status();
-    // INFO("%s: status = %d", __func__, status);
+
+
+  while (1)
+  {
+    while ((status != STATION_GOT_IP) && (retries))
+    {
+      status = sdk_wifi_station_get_connect_status();
+      printf("%s: status = %d\n\r", __func__, status);
+      if (status == STATION_WRONG_PASSWORD)
+      {
+        printf("WiFi: wrong password\n\r");
+        break;
+      }
+      else if (status == STATION_NO_AP_FOUND)
+      {
+        printf("WiFi: AP not found\n\r");
+        break;
+      }
+      else if (status == STATION_CONNECT_FAIL)
+      {
+        printf("WiFi: connection failed\r\n");
+        break;
+      }
+      wait(1000);
+      --retries;
+    }
     if (status == STATION_GOT_IP)
     {
-        stateChanged = state(H("connected"));
-        timeout(1000);
+      printf("WiFi: Connected\n\r");
+     
+      wait(1000);
     }
-    else
+
+    while ((status = sdk_wifi_station_get_connect_status()) == STATION_GOT_IP)
     {
-        stateChanged = state(H("disconnected"));
-        if (status == STATION_WRONG_PASSWORD)
-        {
-            ERROR("WiFi: wrong password");
-        }
-        else if (status == STATION_NO_AP_FOUND)
-        {
-            ERROR("WiFi: AP not found");
-        }
-        else if (status == STATION_CONNECT_FAIL)
-        {
-            ERROR("WiFi: connection failed");
-        }
-        if (stateChanged)
-        {
-            sdk_wifi_station_disconnect();
-        }
-        timeout(1000);
-    };
+      wait(1000);
+    }
+    printf("WiFi: disconnected\n\r");
+    sdk_wifi_station_disconnect();
+    wait(1000);
+  }
 }
+}
+
