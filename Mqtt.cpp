@@ -43,80 +43,110 @@ static void topic_received(mqtt_message_data_t *md)
     INFO(" MQTT RXD %s : %s ", topic.c_str(), payload.c_str());
 }
 
-Mqtt::Mqtt(const char *name) : VerticleTask(name, 512, 1)
+Mqtt::Mqtt(const char *name) : VerticleTask(name, 512, 1),_topicAlive(40)
 {
 
 };
 
-void Mqtt::run()
+void Mqtt::start()
 {
     mqtt_network_new(&_network);
-    memset(_mqtt_client_id, 0, sizeof(_mqtt_client_id));
+    ZERO(_mqtt_client_id);
     strcpy(_mqtt_client_id, "ESP-");
     strcat(_mqtt_client_id, get_my_id());
-    Str topicAlive(30);
-    topicAlive = "src/";
-    topicAlive += get_my_id();
-    topicAlive += "/alive";
+    _topicAlive = "src/";
+    _topicAlive +=_mqtt_client_id;
+    _topicAlive += "/system/alive";
+    VerticleTask::start();
+}
+
+Erc Mqtt::publish(Str& topic,Str& msg)
+{
+    int ret;
+    mqtt_message_t message;
+    message.payload = (void*)msg.c_str();
+    message.payloadlen = msg.length();
+    message.dup = 0;
+    message.qos = MQTT_QOS1;
+    message.retained = 0;
+    ret = mqtt_publish(&_client, topic.c_str() ,&message);
+    if (ret != MQTT_SUCCESS) {
+        ERROR("error while publishing message: %d", ret);
+        return EIO;
+    }
+    return E_OK;
+}
+
+void Mqtt::run()
+{
+
+
     int ret = 0;
-    INFO(" clientId : %s , topic alive : %s", _mqtt_client_id, topicAlive.c_str());
+    INFO(" clientId : %s , topic alive : %s", _mqtt_client_id,_topicAlive.c_str());
+    wait(15000);
 
     while (true) {
-        wait(5000);
-        INFO("%s: started", __func__);
-        INFO("%s: (Re)connecting to MQTT server %s ... ", __func__, MQTT_HOST);
-        ret = mqtt_network_connect(&_network, MQTT_HOST, MQTT_PORT);
-        if (ret) {
-            INFO("error: %d", ret);
-            taskYIELD();
-            continue;
-        }
-        INFO("done");
-        mqtt_client_new(&_client, &_network, 5000, _mqtt_buf, 100, _mqtt_readbuf, 100);
-
-        _data.willFlag = 0;
-        _data.MQTTVersion = 3;
-        _data.clientID.cstring = _mqtt_client_id;
-        _data.username.cstring = MQTT_USER;
-        _data.password.cstring = MQTT_PASS;
-        _data.keepAliveInterval = 10;
-        _data.cleansession = 0;
-        INFO("Send MQTT connect ... ");
-        _ret = mqtt_connect(&_client, &_data);
-        if (_ret) {
-            INFO("error: %d", _ret);
+        goto TCP_CONNECTING;
+TCP_DISCONNECTING: {
             mqtt_network_disconnect(&_network);
-            taskYIELD();
-            continue;
         }
-        INFO("done");
-        mqtt_subscribe(&_client, "#", MQTT_QOS1, topic_received);
-
-        while (true) {
-            char msg[PUB_MSG_LEN - 1] = "\0";
-            strcpy(msg, "alive");
-            wait(1000);
-
-            INFO("got message to publish");
-            mqtt_message_t message;
-            message.payload = msg;
-            message.payloadlen = strlen(msg);
-            message.dup = 0;
-            message.qos = MQTT_QOS1;
-            message.retained = 0;
-            ret = mqtt_publish(&_client, topicAlive.c_str(), &message);
-            if (ret != MQTT_SUCCESS) {
-                INFO("error while publishing message: %d", ret);
-                break;
+TCP_CONNECTING : {
+            while(true) {
+                wait(5000);
+                INFO(" (Re)connecting to MQTT server %s ... ",  MQTT_HOST);
+                ret = mqtt_network_connect(&_network, MQTT_HOST, MQTT_PORT);
+                if (ret) {
+                    INFO("error: %d", ret);
+                } else {
+                    INFO (" TCP connected.");
+                    goto MQTT_CONNECTING;
+                }
             }
+        };
+MQTT_CONNECTING : {
+            while(true) {
+                mqtt_client_new(&_client, &_network, 20000, _mqtt_buf, 100, _mqtt_readbuf, 100);
 
-            _ret = mqtt_yield(&_client, 1000);
-            if (_ret == MQTT_DISCONNECTED)
-                break;
+                _data.willFlag = 0;
+                _data.MQTTVersion = 3;
+                _data.clientID.cstring = _mqtt_client_id;
+                _data.username.cstring = MQTT_USER;
+                _data.password.cstring = MQTT_PASS;
+                _data.keepAliveInterval = 10;
+                _data.cleansession = 0;
+                INFO("Send MQTT connect ... ");
+                _ret = mqtt_connect(&_client, &_data);
+                if (_ret) {
+                    INFO("error: %d", _ret);
+
+                    goto TCP_DISCONNECTING;
+                } else {
+                    INFO("MQTT connected ");
+                    goto PUBLISHING;
+                }
+            }
+        }
+        goto SUBSCRIBING;
+SUBSCRIBING: {
+            mqtt_subscribe(&_client, "#", MQTT_QOS1, topic_received);
+            goto PUBLISHING;
+        }
+PUBLISHING: {
+            while (true) {
+                Str b(10);
+                b = "true";
+                INFO(" publishing : %s = %s ",_topicAlive.c_str(),b.c_str());
+                Erc erc = publish(_topicAlive,b);
+                if ( erc != E_OK ) {
+                    goto TCP_DISCONNECTING;
+                }
+                _ret = mqtt_yield(&_client, 1000);
+                if (_ret == MQTT_DISCONNECTED) {
+                    goto TCP_DISCONNECTING;
+                }
+                wait(1000);
+            }
         }
 
-        INFO("Connection dropped, request restart");
-        mqtt_network_disconnect(&_network);
-        taskYIELD();
     }
 }

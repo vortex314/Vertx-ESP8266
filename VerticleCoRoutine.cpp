@@ -21,7 +21,7 @@ void VerticleCoRoutine::run()
     crSTART(handle());
     for (;;) {
         crDELAY(handle(), 1000);
-        INFO(" coroutine-%X running", handle());
+        INFO(" coroutine-%s running default.", name());
     }
     crEND();
 }

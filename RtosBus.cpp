@@ -10,9 +10,16 @@
 #include "lwip/netdb.h"
 #include "lwip/dns.h"
 #include "lwip/mem.h"
+
+
+#include <Wifi.h>
+#include <Telnet.h>
+#include <Mqtt.h>
+#include <Monitor.h>
+#include <LedBlinker.h>
 //#include <Hardware.h> //
 
-Log logger(1024);
+
 
 /*
 The Router receives messages  and sends them  to subscribers or destinations
@@ -25,7 +32,7 @@ The Router receives messages  and sends them  to subscribers or destinations
     Header : dst
 
 */
-extern "C" void __cxa_pure_virtual()
+extern "C" void __cxa_pure_virtua2l()
 {
     while (1) {
         ERROR(" pure virtual called !!");
@@ -49,33 +56,10 @@ public:
     }
 };
 
-class LedTask : public VerticleTask
-{
-    uint32_t _gpio = 2;
-    uint32_t _gpio2 = 16;
-    uint32_t notifyValue;
-
-public:
-    LedTask(const char *name)
-        : VerticleTask(name, 256, 1) {
-    }
-
-    void run() {
-        gpio_enable(_gpio, GPIO_OUTPUT);
-        gpio_enable(_gpio2, GPIO_OUTPUT);
-        while (true) {
-            wait(100);
-            gpio_write(_gpio, 1);
-            gpio_write(_gpio2, 0);
-            wait(100);
-            gpio_write(_gpio, 0);
-            gpio_write(_gpio2, 1);
-        }
-    }
-};
 
 
-EventBus EB(1024);
+
+
 
 class Task : public VerticleTask
 {
@@ -94,12 +78,8 @@ public:
     }
 };
 
-Task task("task");
 
-#include <Wifi.h>
-#include <Telnet.h>
-#include <Mqtt.h>
-#include <Monitor.h>
+
 
 
 
@@ -109,24 +89,26 @@ public:
     DummyVerticle(const char* name):VerticleCoRoutine(name) {
 
     }
-    void run(CoRoutineHandle_t xHandle) {
-        crSTART(xHandle);
+    void run() {
+        crSTART(handle());
         for (;;) {
-            crDELAY(xHandle, 10000);
-            INFO(" coroutine-%s running", name());
+            crDELAY(handle(), 10000);
+            INFO("_____________________________________________", name());
         }
         crEND();
     }
 };
 
+EventBus EB(1024);
+Log logger(256);
 Telnet telnet("telnet");
 Wifi wifi("wifi");
-LedTask led("LED");
+LedBlinker led("LED");
 Monitor monitor("monitor");
 CoRoutineTask coRoutines("CoRout");
 DummyVerticle dummy("DUMMY");
 Mqtt mqtt("mqtt");
-
+Task task("task");
 
 
 
