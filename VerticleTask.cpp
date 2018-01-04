@@ -3,7 +3,7 @@
 VerticleTask::VerticleTask(const char *name, uint16_t stack, uint8_t priority)
 {
     // _next = 0;
-        _taskHandle=0;
+    _taskHandle=0;
     _name = new char[strlen(name) + 1];
     strcpy(_name, name);
     _stackSize = stack;
@@ -18,8 +18,7 @@ VerticleTask::VerticleTask(const char *name, uint16_t stack, uint8_t priority)
 
 void VerticleTask::run()
 {
-    while (true)
-    {
+    while (true) {
         INFO(" default  run()   : %s : %X ", _name, this);
         wait(1000);
     }
@@ -38,8 +37,7 @@ void VerticleTask::start()
     /*    TimerHandle_t timer = xTimerCreate("LED", 10000 / portTICK_PERIOD_MS, pdTRUE, (void *)0, timerHandler);
     vTimerSetTimerID(timer, this);
     xTimerStart(timer, 0);*/
-    if (xTaskCreate(&handler, _name, _stackSize, this, _priority, &_taskHandle)==pdPASS)
-    {
+    if (xTaskCreate(&handler, _name, _stackSize, this, _priority, &_taskHandle)==pdPASS) {
         INFO(" Task created %s : %X ",_name,_taskHandle);
     } else {
         ERROR(" Task creation failed  %s : %X ",_name,_taskHandle);
@@ -92,11 +90,12 @@ const char *VerticleTask::name()
     return _name;
 }
 
-void VerticleTask::print(){
+void VerticleTask::print()
+{
     INFO(" name : %s , worker : %d, stack : %d, prio : %d",_name,isTask(),_stackSize,_priority);
 }
 
-    TaskHandle_t VerticleTask::getHandle()
-    {
-        return _taskHandle;;
-    }
+TaskHandle_t VerticleTask::getHandle()
+{
+    return _taskHandle;;
+}

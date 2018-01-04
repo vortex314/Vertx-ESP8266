@@ -19,12 +19,16 @@ class Verticle;
 
 class Verticle : public LinkedList<Verticle>
 {
-  public:
-    virtual const char *name() { return "ERRORE!"; };
+public:
+    virtual const char *name() {
+        return "ERRORE!";
+    };
     virtual void start() { };
     virtual void stop() {};
     virtual void onMessage(Cbor &msg) {};
-    virtual bool isTask() {return false;};
+    virtual bool isTask() {
+        return false;
+    };
     //    virtual void onTimer() = 0;
     //   virtual void onInterrupt() = 0;
 };
@@ -42,9 +46,9 @@ class VerticleTask : public Verticle
     uint16_t _stackSize;
     uint8_t _priority;
     uint32_t _nextEvent;
-    
-  public:
-TaskHandle_t _taskHandle;
+
+public:
+    TaskHandle_t _taskHandle;
     VerticleTask(const char *name,  uint16_t stack, uint8_t priority);
     const char *name();
     virtual void run();
@@ -55,7 +59,9 @@ TaskHandle_t _taskHandle;
 
     void notify(Notification n);
     uint32_t wait(uint32_t time);
-    bool isTask() { return true; };
+    bool isTask() {
+        return true;
+    };
 
     static void handler(void *p);
 
@@ -72,11 +78,14 @@ class VerticleCoRoutine : public Verticle
     char *_name;
     CoRoutineHandle_t _xHandle;
 
-  public:
+public:
     VerticleCoRoutine(const char *name) ;
     CoRoutineHandle_t getHandle();
+    inline CoRoutineHandle_t handle() {
+        return _xHandle;
+    };
     const char* name();
-    virtual void run(CoRoutineHandle_t xHandle);
+    virtual void run();
     static void handler(CoRoutineHandle_t xHandle, UBaseType_t uxIndex);
     void start();
     void stop();
@@ -88,19 +97,20 @@ class VerticleCoRoutine : public Verticle
 typedef Cbor Message;
 
 
-class Address {
+class Address
+{
     uid_t _uid;
-    public:
-    Address(const char* s){
+public:
+    Address(const char* s) {
         _uid =  UID.add(s);
     }
-    uid_t uid(){
+    uid_t uid() {
         return _uid;
     }
-    const char* label(){
-       return UID.label(_uid);
+    const char* label() {
+        return UID.label(_uid);
     }
-    bool match(Address& addr){
+    bool match(Address& addr) {
         return _uid == addr._uid;
     }
 };
@@ -114,9 +124,8 @@ class MessageHandler
     Verticle &_verticle;
     VerticleMethod _method;
 
-  public:
-    MessageHandler(Verticle &verticle, VerticleMethod method) : _verticle(verticle), _method(method)
-    {
+public:
+    MessageHandler(Verticle &verticle, VerticleMethod method) : _verticle(verticle), _method(method) {
     }
     void handle(Message &msg) {
         CALL_MEMBER_FN(_verticle,_method)(msg);
@@ -127,7 +136,7 @@ class MessageHandler
 
 class EventBus
 {
-  public:
+public:
     EventBus(uint32_t size);
     Erc publish(Address, Message &);
     Erc send(Address, Message &);

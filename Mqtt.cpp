@@ -1,7 +1,7 @@
 
 #include <Mqtt.h>
 
-#define MQTT_HOST ("test.mosquitto.org")
+#define MQTT_HOST ("limero.ddns.net")
 #define MQTT_PORT 1883
 
 #define MQTT_USER NULL
@@ -20,8 +20,7 @@ static const char *get_my_id(void)
         return my_id;
     if (!sdk_wifi_get_macaddr(STATION_IF, (uint8_t *)my_id))
         return NULL;
-    for (i = 5; i >= 0; --i)
-    {
+    for (i = 5; i >= 0; --i) {
         x = my_id[i] & 0x0F;
         if (x > 9)
             x += 7;
@@ -44,9 +43,10 @@ static void topic_received(mqtt_message_data_t *md)
     INFO(" MQTT RXD %s : %s ", topic.c_str(), payload.c_str());
 }
 
-Mqtt::Mqtt(const char *name) : VerticleTask(name, 512, 1){
+Mqtt::Mqtt(const char *name) : VerticleTask(name, 512, 1)
+{
 
-                               };
+};
 
 void Mqtt::run()
 {
@@ -61,14 +61,12 @@ void Mqtt::run()
     int ret = 0;
     INFO(" clientId : %s , topic alive : %s", _mqtt_client_id, topicAlive.c_str());
 
-    while (true)
-    {
+    while (true) {
         wait(5000);
         INFO("%s: started", __func__);
         INFO("%s: (Re)connecting to MQTT server %s ... ", __func__, MQTT_HOST);
         ret = mqtt_network_connect(&_network, MQTT_HOST, MQTT_PORT);
-        if (ret)
-        {
+        if (ret) {
             INFO("error: %d", ret);
             taskYIELD();
             continue;
@@ -85,8 +83,7 @@ void Mqtt::run()
         _data.cleansession = 0;
         INFO("Send MQTT connect ... ");
         _ret = mqtt_connect(&_client, &_data);
-        if (_ret)
-        {
+        if (_ret) {
             INFO("error: %d", _ret);
             mqtt_network_disconnect(&_network);
             taskYIELD();
@@ -95,11 +92,10 @@ void Mqtt::run()
         INFO("done");
         mqtt_subscribe(&_client, "#", MQTT_QOS1, topic_received);
 
-        while (true)
-        {
+        while (true) {
             char msg[PUB_MSG_LEN - 1] = "\0";
             strcpy(msg, "alive");
-            uint32_t n = wait(1000);
+            wait(1000);
 
             INFO("got message to publish");
             mqtt_message_t message;
@@ -109,8 +105,7 @@ void Mqtt::run()
             message.qos = MQTT_QOS1;
             message.retained = 0;
             ret = mqtt_publish(&_client, topicAlive.c_str(), &message);
-            if (ret != MQTT_SUCCESS)
-            {
+            if (ret != MQTT_SUCCESS) {
                 INFO("error while publishing message: %d", ret);
                 break;
             }
