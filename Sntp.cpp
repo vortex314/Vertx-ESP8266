@@ -17,7 +17,9 @@
 
 #include <ssid_config.h>
 /* Add extras/sntp component to makefile for this include to work */
+extern "C" {
 #include <sntp.h>
+}
 #include <time.h>
 
 #define SNTP_SERVERS                                                           \
@@ -27,7 +29,7 @@ enum {
     WIFI_CONNECTED
 };
 
-Sntp::Sntp(const char* name)  : VerticleTask("sntp",250,1)
+Sntp::Sntp(const char* name)  : VerticleTask("sntp",512,6)
 {
 }
 
@@ -39,7 +41,9 @@ void Sntp::start()
 {
     eb.on("wifi/connected",[this](Message& msg) {
         signal(WIFI_CONNECTED);
+        INFO(" SNTP wifi connected ");
     });
+    VerticleTask::start();
 }
 
 void Sntp::run()
@@ -49,6 +53,7 @@ void Sntp::run()
     while(true) {
         wait(1000);
         if ( hasSignal(WIFI_CONNECTED)) {
+            INFO(" SNTP wifi connected ");
             const char *servers[] = {SNTP_SERVERS};
             /* SNTP will request an update each 5 minutes */
             sntp_set_update_delay(5 * 60000);
@@ -60,7 +65,7 @@ void Sntp::run()
             sntp_set_servers((char**)servers, sizeof(servers) / sizeof(char *));
         } else {
             time_t ts = time(NULL);
-            INFO("TIME: %s", ctime(&ts));
+            INFO(" SNTP TIME: %s", ctime(&ts));
         }
     }
 }

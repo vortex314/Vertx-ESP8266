@@ -114,7 +114,7 @@ void Mqtt2::publish(Str& topic,Str& message)
 {
     if ( !_mqttConnected ) return;
     err_t err;
-    u8_t qos = 2; /* 0 1 or 2, see MQTT specification */
+    u8_t qos = 0; /* 0 1 or 2, see MQTT specification */
     u8_t retain = 0; /* No don't retain such crappy payload... */
     err = mqtt_publish(_client,
                        topic.c_str(),
@@ -143,7 +143,7 @@ void Mqtt2::mqtt_pub_request_cb(void *arg, err_t result)
 
 void Mqtt2::run()
 {
-    TimerHandle_t th = xTimerCreate("mqtt",1000,pdTRUE,this,timerHandler);
+    TimerHandle_t th = xTimerCreate("mqtt",100/portTICK_PERIOD_MS,pdTRUE,this,timerHandler);
     xTimerStart(th,0);
     int cnt=0;
     while(true) {
@@ -157,7 +157,7 @@ void Mqtt2::run()
         if ( hasSignal(MQTT_CONNECTED)) {
             _mqttConnected=true;
             eb.publish("mqtt/connected");
-            err_t err = mqtt_subscribe(_client, "#", 1, mqtt_sub_request_cb, this);
+            err_t err = mqtt_subscribe(_client, "src/+/system/alive", 1, mqtt_sub_request_cb, this);
             if ( err ) ERROR(" subscribe failed ");
         };
         if ( hasSignal(MQTT_SUBSCRIBED)) {

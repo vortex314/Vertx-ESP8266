@@ -10,7 +10,7 @@ SERIAL_PORT ?= /dev/tty$(TTY)
 ESPPORT = $(SERIAL_PORT)
 SERIAL_BAUD = 921600
 LIBS= m hal gcc 
-PROGRAM_CFLAGS= -DESP8266_OPEN_RTOS  build/sntp.a
+PROGRAM_CFLAGS= -DESP8266_OPEN_RTOS 
 
 include ../esp-open-rtos/common.mk
 

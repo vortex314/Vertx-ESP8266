@@ -5,7 +5,7 @@ LedBlinker::LedBlinker(const char *name)
     : VerticleCoRoutine(name)
 {
     _gpio = 2;
-    _interval=100;
+    _interval=100/portTICK_PERIOD_MS;
 }
 
 void LedBlinker::run()
@@ -29,6 +29,7 @@ void LedBlinker::setGpio(uint32_t gpio)
     _gpio=gpio;
 }
 
-void LedBlinker::setInterval(uint32_t interval){
-    _interval=interval;
+void LedBlinker::setInterval(uint32_t interval)
+{
+    _interval=interval/portTICK_PERIOD_MS;
 }
