@@ -14,6 +14,7 @@ VerticleTask::VerticleTask(const char *name, uint16_t stack, uint8_t priority)
     INFO(" VerticleTask : %s = 0x%X", _name, this);
     add(this);
     // LinkedList<Verticle>::add(this);
+    xTimerCreate("mqtt",1000,pdTRUE,this,timerHandler);
 };
 
 void VerticleTask::run()
@@ -53,7 +54,7 @@ void VerticleTask::onMessage(Cbor &msg)
 {
     // copy message
     // awake thread
-    notify(N_MESSAGE);
+    signalSys(SIGNAL_MESSAGE);
     INFO(" received message in %s , default handler invoked.", _name);
 }
 
@@ -63,18 +64,29 @@ uint32_t VerticleTask::newEvent()
     return _nextEvent;
 }
 
-void VerticleTask::notify(Notification n)
+void VerticleTask::signal(uint32_t n)
 {
-    xTaskNotify(_taskHandle, n, eSetBits);
+    signalSys(n+2); // 2 bits reserved
+}
+
+void VerticleTask::signalSys(uint32_t n)
+{
+    DEBUG(" sending notification %d to %s",n,name());
+    if ( _taskHandle )
+        xTaskNotify(_taskHandle, 1<<n, eSetBits);
 }
 
 uint32_t VerticleTask::wait(uint32_t time)
 {
-    uint32_t notification;
-    xTaskNotifyWait(0x00, UINT32_MAX, &notification, time/portTICK_PERIOD_MS);
-    if (notification)
-        INFO(" %s notification received %d", _name, notification);
-    return notification;
+    xTaskNotifyWait(0x00, UINT32_MAX, &_lastNotify, time/portTICK_PERIOD_MS);
+    if (_lastNotify)
+        DEBUG(" %s notification received %d", _name, _lastNotify);
+    return _lastNotify;
+}
+
+bool VerticleTask::hasSignal(uint32_t sig)
+{
+    return ( _lastNotify & (1<<(sig+2)));
 }
 
 
@@ -82,7 +94,8 @@ uint32_t VerticleTask::wait(uint32_t time)
 void VerticleTask::timerHandler(TimerHandle_t th)
 {
     VerticleTask *pv = (VerticleTask *)pvTimerGetTimerID(th);
-    pv->notify(N_TIMER);
+    pv->signalSys(SIGNAL_TIMER);
+    DEBUG(" TIMER FIRED ");
 }
 
 const char *VerticleTask::name()

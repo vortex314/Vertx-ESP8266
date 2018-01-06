@@ -14,7 +14,7 @@
 
 #include <Wifi.h>
 #include <Telnet.h>
-#include <Mqtt.h>
+//#include <Mqtt.h>
 #include <Monitor.h>
 #include <LedBlinker.h>
 //#include <Hardware.h> //
@@ -77,17 +77,41 @@ public:
         }
     }
 };
+#include <Mqtt2.h>
 
 
+EventBus eb(1024);
+Log logger(256);
+Telnet telnet("telnet");
+Wifi wifi("wifi");
+LedBlinker ledBlue("LED_BLUE");
+LedBlinker ledRed("LED_RED");
+Monitor monitor("monitor");
+CoRoutineTask coRoutines("CoRout");
+
+Mqtt2 mqtt("mqtt");
+Task task("task");
 
 
 
 
 class DummyVerticle : public VerticleCoRoutine
 {
+    uint32_t _interval;
 public:
     DummyVerticle(const char* name):VerticleCoRoutine(name) {
 
+    }
+    void start() {
+        eb.on("wifi/disconnected",[this](Message& evt) {
+            _interval=100;
+            INFO(" interval : %d",_interval);
+        });
+        eb.on("wifi/connected",[this](Message& evt) {
+            _interval=1000;
+            INFO(" interval : %d",_interval);
+        });
+        VerticleCoRoutine::start();
     }
     void run() {
         crSTART(handle());
@@ -99,29 +123,47 @@ public:
     }
 };
 
-EventBus EB(1024);
-Log logger(256);
-Telnet telnet("telnet");
-Wifi wifi("wifi");
-LedBlinker led("LED");
-Monitor monitor("monitor");
-CoRoutineTask coRoutines("CoRout");
 DummyVerticle dummy("DUMMY");
-Mqtt mqtt("mqtt");
-Task task("task");
 
-
+void addMac(Str& str)
+{
+    uint8_t my_id[13];
+    sdk_wifi_get_macaddr(STATION_IF, my_id);
+    str.appendHex(my_id,6,0);
+}
 
 extern "C" void user_init(void)
 {
 
     uart_set_baud(0, 921600);
     INFO("SDK version:%s\n", sdk_system_get_sdk_version());
+    Str hn(20);
+    hn ="ESP-";
+    addMac(hn);
+    INFO(" host : %s",hn.c_str());
+    Sys::hostname(hn.c_str());
+
+    ledBlue.setGpio(2);
+    ledBlue.setInterval(100);
+
+    ledRed.setGpio(16);
+    ledRed.setInterval(100);
 
     Verticle* pv;
     for(pv=Verticle::first(); pv; pv=pv->next())
         pv->start();
 
-    MessageHandler handler(task, (VerticleMethod)&Task::onMessage);
-    EB.consumer("wifi.alive", handler);
+    eb.on("wifi/connected", [](Message& evt) {
+        ledBlue.setInterval(1000);
+    });
+    eb.on("wifi/disconnected", [](Message& evt) {
+        ledBlue.setInterval(100);
+    });
+
+    eb.on("mqtt/connected", [](Message& evt) {
+        ledRed.setInterval(1000);
+    });
+    eb.on("mqtt/disconnected", [](Message& evt) {
+        ledRed.setInterval(100);
+    });
 }

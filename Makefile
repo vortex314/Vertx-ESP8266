@@ -1,8 +1,8 @@
 PROGRAM=vertx-esp8266
-EXTRA_COMPONENTS = extras/paho_mqtt_c ../Common  ../ArduinoJson
+EXTRA_COMPONENTS = ../Common  ../ArduinoJson
 # EXTRA_COMPONENTS = extras/paho_mqtt_c ../Common ../Ebos ../ArduinoJson
 PROGRAM_SRC_DIR=.
-PROGRAM_INC_DIR=. ../esp-open-rtos/include ../Common  ../ArduinoJson
+PROGRAM_INC_DIR=. ../esp-open-rtos/include ../Common  ../ArduinoJson ../esp-open-rtos/lwip/lwip/src/include
 # PROGRAM_INC_DIR=. ../esp-open-rtos/include ../Common ../Ebos ../ArduinoJson
 ESPBAUD=921600
 TTY ?= USB0

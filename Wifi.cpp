@@ -6,53 +6,54 @@ Wifi::Wifi(const char *name) : VerticleTask(name,284,6) {};
 
 void Wifi::run()
 {
-
-    Address myAddress("src/wifi");
-
-    Cbor connected(10);
-    connected.addKeyValue(UID.add("connected"),true);
-
     while (true) {
         uint8_t retries = 30;
         uint8_t status = 0;
         ZERO(config);
         strcpy((char *)config.ssid, WIFI_SSID);
         strcpy((char *)config.password, WIFI_PASS);
-        INFO("WiFi: connecting to WiFi\n\r");
-        sdk_wifi_set_opmode(STATION_MODE);
-        sdk_wifi_station_set_config(&config);
-
-
+        INFO("WiFi: connecting to WiFi");
         wait(5000);
-        while (1) {
-            retries=30;
-            while ((status != STATION_GOT_IP) && (retries)) {
-                status = sdk_wifi_station_get_connect_status();
-                INFO("Wifi status =%d , retries left: %d", status,retries);
-                if (status == STATION_WRONG_PASSWORD) {
-                    INFO("WiFi: wrong password");
-                    break;
-                } else if (status == STATION_NO_AP_FOUND) {
-                    INFO("WiFi: AP not found");
-                    break;
-                } else if (status == STATION_CONNECT_FAIL) {
-                    INFO("WiFi: connection failed");
-                    break;
-                }
-                wait(1000);
-                --retries;
-            }
-            if (status == STATION_GOT_IP) {
-                INFO("WiFi: Connected");
-                wait(1000);
-            }
-
-            while ((status = sdk_wifi_station_get_connect_status()) == STATION_GOT_IP) {
-                wait(1000);
-            }
+DISCONNECTED : {
             INFO("WiFi: disconnected");
-            sdk_wifi_station_disconnect();
-            wait(1000);
+            eb.publish("wifi/disconnected");
+            while(true) {
+                retries=30;
+                sdk_wifi_set_opmode(STATION_MODE);
+                sdk_wifi_station_set_config(&config);
+                while (true) {
+                    status = sdk_wifi_station_get_connect_status();
+                    if ( status == STATION_GOT_IP ) goto CONNECTED;
+                    INFO("Wifi status =%d , retries left: %d", status,retries);
+                    if (status == STATION_WRONG_PASSWORD) {
+                        INFO("WiFi: wrong password");
+                        break;
+                    } else if (status == STATION_NO_AP_FOUND) {
+                        INFO("WiFi: AP not found");
+                        break;
+                    } else if (status == STATION_CONNECT_FAIL) {
+                        INFO("WiFi: connection failed");
+                        break;
+                    }
+                    --retries;
+                    if ( retries==0) break;
+                    wait(1000);
+                }
+                sdk_wifi_station_disconnect();
+            }
+        }
+CONNECTED : {
+            eb.publish("wifi/connected");
+            INFO("WiFi: Connected");
+            while (true) {
+                status = sdk_wifi_station_get_connect_status();
+                if ( status == STATION_GOT_IP) {
+                    wait(1000);
+                } else {
+                    sdk_wifi_station_disconnect();
+                    goto DISCONNECTED;
+                }
+            }
         }
     }
 }

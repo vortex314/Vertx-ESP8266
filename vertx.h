@@ -1,6 +1,8 @@
 #ifndef _VERTICLE_H_
 #define _VERTICLE_H_
 
+#include <memory>
+
 #include <FreeRTOS.h>
 #include <task.h>
 #include <timers.h>
@@ -29,16 +31,13 @@ public:
     virtual bool isTask() {
         return false;
     };
+
     //    virtual void onTimer() = 0;
     //   virtual void onInterrupt() = 0;
 };
 
-typedef enum {
-    N_TIMEOUT = 1,
-    N_MESSAGE = 2,
-    N_TIMER = 4,
-    N_INTERRUPT = 8
-} Notification;
+#define SIGNAL_MESSAGE 0
+#define SIGNAL_TIMER 1
 
 class VerticleTask : public Verticle
 {
@@ -46,7 +45,7 @@ class VerticleTask : public Verticle
     uint16_t _stackSize;
     uint8_t _priority;
     uint32_t _nextEvent;
-
+    uint32_t  _lastNotify;
 public:
     TaskHandle_t _taskHandle;
     VerticleTask(const char *name,  uint16_t stack, uint8_t priority);
@@ -57,7 +56,9 @@ public:
     void stop();
     uint32_t newEvent();
 
-    void notify(Notification n);
+    void signal(uint32_t  n);
+    void signalSys(uint32_t n);
+    bool hasSignal(uint32_t n);
     uint32_t wait(uint32_t time);
     bool isTask() {
         return true;
@@ -93,60 +94,70 @@ public:
     bool isTask();
 };
 
+typedef uint16_t offset_t;
 
-typedef Cbor Message;
+typedef struct {
+    uid_t uid;
+    offset_t next;
 
+} TokenHeader;
 
-class Address
+class Message
 {
-    uid_t _uid;
+    uint32_t* _start;
+    offset_t _size;
+    offset_t _lastToken;
+    offset_t _nextFree;
+    void next16() {
+        while(_nextFree & 0x1 ) _nextFree++;
+    };
+    void next32() {
+        while(_nextFree & 0x3 ) _nextFree++;
+    };
+    void add(void* item,uint32_t itemSize, int alignment);
+    offset_t seek(uid_t);
+    bool valid(offset_t);
+    bool hasSpace(uint32_t size ) {
+        if ( _size > 4 )
+            return (_nextFree + size ) < (offset_t)(_size-4);
+        else
+            return false;
+    }
 public:
-    Address(const char* s) {
-        _uid =  UID.add(s);
-    }
-    uid_t uid() {
-        return _uid;
-    }
-    const char* label() {
-        return UID.label(_uid);
-    }
-    bool match(Address& addr) {
-        return _uid == addr._uid;
-    }
+    Message(uint32_t size);
+
+    Message& put(uid_t , uint32_t );
+    Message& put(uid_t , Bytes& );
+
+    bool get(uid_t,uint32_t&);
+    bool get(uid_t,Bytes&);
+
+    void finish();
 };
 
-typedef void (*FunctionPointer)();
-typedef void (Verticle::*VerticleMethod)(Message &);
-#define CALL_MEMBER_FN(object, ptrToMember) ((object).*(ptrToMember))
-
-class MessageHandler
-{
-    Verticle &_verticle;
-    VerticleMethod _method;
-
-public:
-    MessageHandler(Verticle &verticle, VerticleMethod method) : _verticle(verticle), _method(method) {
-    }
-    void handle(Message &msg) {
-        CALL_MEMBER_FN(_verticle,_method)(msg);
-    }
-};
+#define EventHandler std::function<void (Message&)>
 
 
+//typedef  EventHandler ;
+typedef const char* EventLabel;
 
 class EventBus
 {
 public:
     EventBus(uint32_t size);
-    Erc publish(Address, Message &);
-    Erc send(Address, Message &);
-    Erc consumer(Address, MessageHandler &);
-    Erc localConsumer(Address, MessageHandler &);
-    Erc addInterceptor(MessageHandler &);
-    Erc removeInterceptor(MessageHandler &);
+    Erc publish(EventLabel);
+    Erc publish(uid_t);
+    Erc publish(EventLabel, Message &);
+    Erc publish(uid_t ,Message& );
+    Erc send(EventLabel, Message &);
+    Erc consumer(EventLabel , EventHandler );
+    Erc localConsumer(EventLabel, EventHandler );
+    Erc addInterceptor(EventHandler );
+    Erc removeInterceptor(EventHandler );
+    Erc on(EventLabel  address,EventHandler);
     static void eventLoop();
 };
 
-extern EventBus EB;
+extern EventBus eb;
 
 #endif

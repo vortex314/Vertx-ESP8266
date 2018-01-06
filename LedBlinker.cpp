@@ -5,21 +5,30 @@ LedBlinker::LedBlinker(const char *name)
     : VerticleCoRoutine(name)
 {
     _gpio = 2;
-    _gpio2 = 16;
+    _interval=100;
 }
 
 void LedBlinker::run()
 {
     crSTART(handle());
     gpio_enable(_gpio, GPIO_OUTPUT);
-    gpio_enable(_gpio2, GPIO_OUTPUT);
+
     while (true) {
-        crDELAY(handle(),100);
+        crDELAY(handle(),_interval);
         gpio_write(_gpio, 1);
-        gpio_write(_gpio2, 0);
-        crDELAY(handle(),100);
+
+        crDELAY(handle(),_interval);
         gpio_write(_gpio, 0);
-        gpio_write(_gpio2, 1);
+
     }
     crEND();
+}
+
+void LedBlinker::setGpio(uint32_t gpio)
+{
+    _gpio=gpio;
+}
+
+void LedBlinker::setInterval(uint32_t interval){
+    _interval=interval;
 }
