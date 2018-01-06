@@ -16,7 +16,7 @@ enum {
 
 
 
-Mqtt2::Mqtt2(const char* name):VerticleTask(name,512,2) , _topicAlive(40),_topicIncoming(50)
+Mqtt2::Mqtt2(const char* name):VerticleTask(name,512,2) , _topicAlive(40),_topicIncoming(50),_topic(50),_message(100)
 {
     _client = mqtt_client_new();
     _wifiConnected=false;
@@ -110,16 +110,15 @@ void Mqtt2::mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t f
     }
 }
 
-void Mqtt2::publish()
+void Mqtt2::publish(Str& topic,Str& message)
 {
     if ( !_mqttConnected ) return;
-    const char *pub_payload= "true";
     err_t err;
     u8_t qos = 2; /* 0 1 or 2, see MQTT specification */
     u8_t retain = 0; /* No don't retain such crappy payload... */
     err = mqtt_publish(_client,
-                       _topicAlive.c_str(),
-                       pub_payload, strlen(pub_payload),
+                       topic.c_str(),
+                       message.data(), message.length(),
                        qos,
                        retain,
                        mqtt_pub_request_cb,
@@ -146,6 +145,7 @@ void Mqtt2::run()
 {
     TimerHandle_t th = xTimerCreate("mqtt",1000,pdTRUE,this,timerHandler);
     xTimerStart(th,0);
+    int cnt=0;
     while(true) {
         uint32_t n = wait(500);
         if ( hasSignal(MQTT_FAILURE)) {
@@ -177,8 +177,25 @@ void Mqtt2::run()
             _wifiConnected=false;
         };
         if ( (n& (1<<SIGNAL_TIMER) ) && _mqttConnected ) { // timeout
-            INFO(" PUBLISHING >> ");
-            publish();
+            _message.clear();
+            if( cnt==0 ) {
+                _message="true";
+                publish(_topicAlive,_message);
+            } else if ( cnt==1) {
+                _topic = "src/";
+                _topic += Sys::hostname();
+                _topic += "/system/upTime";
+                _message.append(Sys::millis());
+                publish(_topic,_message);
+            } else if ( cnt==2) {
+                _topic = "src/";
+                _topic += Sys::hostname();
+                _topic += "/system/heap";
+                _message.append(Sys::getFreeHeap());
+                publish(_topic,_message);
+            }
+            if (cnt++==3 ) cnt=0;
+
         }
 
     }

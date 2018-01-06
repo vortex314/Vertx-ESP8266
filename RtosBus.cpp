@@ -17,6 +17,7 @@
 //#include <Mqtt.h>
 #include <Monitor.h>
 #include <LedBlinker.h>
+#include <Sntp.h>
 //#include <Hardware.h> //
 
 
@@ -88,6 +89,7 @@ LedBlinker ledBlue("LED_BLUE");
 LedBlinker ledRed("LED_RED");
 Monitor monitor("monitor");
 CoRoutineTask coRoutines("CoRout");
+Sntp sntp("sntp");
 
 Mqtt2 mqtt("mqtt");
 Task task("task");

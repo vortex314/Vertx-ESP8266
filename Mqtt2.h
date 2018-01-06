@@ -13,6 +13,8 @@ class Mqtt2 : public VerticleTask
     bool _wifiConnected;
     bool _mqttConnected;
     Str _topicIncoming;
+    Str _topic;
+    Str _message;
 public:
     Mqtt2(const char*);
     void run();
@@ -24,7 +26,7 @@ public:
 
     static void mqtt_incoming_publish_cb(void *arg, const char *topic, u32_t tot_len);
     static void mqtt_incoming_data_cb(void *arg, const u8_t *data, u16_t len, u8_t flags);
-    void publish();
+    void publish(Str& topic,Str& message);
 
 
 private :
