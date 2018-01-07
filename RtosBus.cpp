@@ -19,6 +19,7 @@
 #include <LedBlinker.h>
 #include <Sntp.h>
 #include <Mdns.h>
+#include <Property.h>
 //#include <Hardware.h> //
 
 
@@ -53,7 +54,7 @@ public:
     void run() {
         while (true) {
             vCoRoutineSchedule();
-            //            EventBus::eventLoop();
+            eb.eventLoop();
         }
     }
 };
@@ -79,7 +80,7 @@ public:
         }
     }
 };
-#include <Mqtt2.h>
+#include <Mqtt.h>
 
 
 EventBus eb(1024);
@@ -92,9 +93,10 @@ Monitor monitor("monitor");
 CoRoutineTask coRoutines("CoRout");
 Sntp sntp("sntp");
 
-Mqtt2 mqtt("mqtt");
+Mqtt mqtt("mqtt");
 Task task("task");
 Mdns mdns("mdns");
+PropertyVerticle propSender("props");
 
 
 
@@ -143,6 +145,7 @@ extern "C" void user_init(void)
 
     uart_set_baud(0, 921600);
     INFO("SDK version:%s\n", sdk_system_get_sdk_version());
+    new PropertyFunction<const char*>("system/sdk",sdk_system_get_sdk_version,5000);
     Str hn(20);
     hn ="ESP-";
     addMac(hn);

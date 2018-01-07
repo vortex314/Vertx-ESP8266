@@ -16,6 +16,9 @@
 #include <Cbor.h>
 #include <LinkedList.hpp>
 #include <Uid.h>
+#include <CborQueue.h>
+
+#define MS_TO_TICK(xx) (xx/portTICK_PERIOD_MS)
 
 class Verticle;
 
@@ -94,55 +97,35 @@ public:
     bool isTask();
 };
 
-typedef uint16_t offset_t;
 
-typedef struct {
-    uid_t uid;
-    offset_t next;
 
-} TokenHeader;
-
-class Message
+class Message :  public Cbor
 {
-    uint32_t* _start;
-    offset_t _size;
-    offset_t _lastToken;
-    offset_t _nextFree;
-    void next16() {
-        while(_nextFree & 0x1 ) _nextFree++;
-    };
-    void next32() {
-        while(_nextFree & 0x3 ) _nextFree++;
-    };
-    void add(void* item,uint32_t itemSize, int alignment);
-    offset_t seek(uid_t);
-    bool valid(offset_t);
-    bool hasSpace(uint32_t size ) {
-        if ( _size > 4 )
-            return (_nextFree + size ) < (offset_t)(_size-4);
-        else
-            return false;
-    }
+
 public:
-    Message(uint32_t size);
-
-    Message& put(uid_t , uint32_t );
-    Message& put(uid_t , Bytes& );
-
-    bool get(uid_t,uint32_t&);
-    bool get(uid_t,Bytes&);
-
-    void finish();
+    Message(uint32_t size):Cbor(size) {
+    }
+    template <typename T> bool get(uid_t uid,T& var) {
+        return getKeyValue(uid,var);
+    };
+    template <typename T> Message& put(uid_t uid,T& var) {
+        addKeyValue(uid,var);
+        return *this;
+    }
+    void clear() {
+        Cbor::clear();
+    }
 };
 
+typedef const char* EventLabel;
 #define EventHandler std::function<void (Message&)>
 
-
-//typedef  EventHandler ;
-typedef const char* EventLabel;
+const uid_t EB_DST = H("dst");
+const uid_t EB_SRC = H("src");
 
 class EventBus
 {
+    CborQueue _queue;
 public:
     EventBus(uint32_t size);
     Erc publish(EventLabel);
@@ -155,9 +138,10 @@ public:
     Erc addInterceptor(EventHandler );
     Erc removeInterceptor(EventHandler );
     Erc on(EventLabel  address,EventHandler);
-    static void eventLoop();
+    void eventLoop();
 };
 
 extern EventBus eb;
+
 
 #endif

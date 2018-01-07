@@ -11,21 +11,6 @@ public:
     };
 };
 
-Message::Message(uint32_t size)
-{
-    _start = new uint32_t[(size/4)+1];
-    _size=size;
-    _nextFree=0;
-    _lastToken=0;
-}
-
-EventBus::EventBus(uint32_t size)
-{
-
-}
-
-
-
 namespace std
 {
 void __throw_bad_function_call()
@@ -34,6 +19,13 @@ void __throw_bad_function_call()
     while(1);
 };
 };
+
+#include <CborQueue.h>
+
+EventBus::EventBus(uint32_t size) :_queue(size)
+{
+
+}
 
 Erc EventBus::on(EventLabel address,EventHandler f)
 {
@@ -49,36 +41,42 @@ Erc EventBus::consumer(EventLabel address,EventHandler f)
 
 Erc EventBus::publish(EventLabel address,Message& message)
 {
-    Message msg(10);
-    Consumer* consumer;
-    uid_t uid=UID.add(address);
-//    int count=0;
-    if ( Consumer::first()==0) ERROR(" no consumers found ");
-    for(consumer=Consumer::first(); consumer; consumer=consumer->next()) {
-//       INFO(" %d : compare %s :%s",count++,UID.label(uid),UID.label(consumer->_eventUid));
-        if ( uid == consumer->_eventUid)
-            consumer->_handler(msg);
-    }
+    Erc erc;
+    uid_t uid = H(address);
+    message.put(EB_DST,uid);
+    taskENTER_CRITICAL(  );
+    erc = _queue.put(message);
+    taskEXIT_CRITICAL(  );
+    if ( erc ) ERROR(" cannot publish to eventbus !!");
     return E_OK;
 }
 
 Erc EventBus::publish(EventLabel label)
 {
-    Message msg(0);
+    Message msg(10);
     INFO(" publish event : '%s'",label);
     return publish(label,msg);
 }
 
+Message _rxd(256);
+
 void EventBus::eventLoop()
 {
-    // get next message and address and type
-    // if type==send -> go directly
-    /*   INFO(" eventLoop ");
-       Message msg(10);
-       Consumer* consumer;
-       for(consumer=Consumer::first(); consumer; consumer=consumer->next()) {
-           consumer->_handler(msg);
-       }*/
-    return;
+    Erc erc;
+    Consumer* consumer;
+    uid_t uidDst;
 
+    taskENTER_CRITICAL(  );
+    erc = _queue.get(_rxd);
+    taskEXIT_CRITICAL(  );
+
+    if ( erc ==0  && _rxd.get(EB_DST,uidDst) ) {
+        for(consumer=Consumer::first(); consumer; consumer=consumer->next()) {
+            if ( uidDst == consumer->_eventUid) {
+                consumer->_handler(_rxd);
+            }
+
+        }
+    }
+    return;
 }
