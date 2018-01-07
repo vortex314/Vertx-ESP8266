@@ -2,7 +2,7 @@
 #include <vertx.h>
 #include <Wifi.h>
 
-Wifi::Wifi(const char *name) : VerticleTask(name,284,6) {};
+Wifi::Wifi(const char *name) : VerticleTask(name,320,6) {};
 #include <lwip/api.h>
 #include <lwip/netif.h>
 void Wifi::run()
