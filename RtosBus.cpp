@@ -18,6 +18,7 @@
 #include <Monitor.h>
 #include <LedBlinker.h>
 #include <Sntp.h>
+#include <Mdns.h>
 //#include <Hardware.h> //
 
 
@@ -93,6 +94,7 @@ Sntp sntp("sntp");
 
 Mqtt2 mqtt("mqtt");
 Task task("task");
+Mdns mdns("mdns");
 
 
 
@@ -133,6 +135,8 @@ void addMac(Str& str)
     sdk_wifi_get_macaddr(STATION_IF, my_id);
     str.appendHex(my_id,6,0);
 }
+#include <sys/unistd.h>
+
 
 extern "C" void user_init(void)
 {

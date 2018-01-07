@@ -41,19 +41,16 @@ void Sntp::start()
 {
     eb.on("wifi/connected",[this](Message& msg) {
         signal(WIFI_CONNECTED);
-        INFO(" SNTP wifi connected ");
     });
     VerticleTask::start();
 }
 
 void Sntp::run()
 {
-
-
     while(true) {
-        wait(1000);
+        wait(20000);
         if ( hasSignal(WIFI_CONNECTED)) {
-            INFO(" SNTP wifi connected ");
+            INFO(" Starting SNTP ");
             const char *servers[] = {SNTP_SERVERS};
             /* SNTP will request an update each 5 minutes */
             sntp_set_update_delay(5 * 60000);

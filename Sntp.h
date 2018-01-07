@@ -10,8 +10,6 @@ public:
     ~Sntp();
     void run();
     void start();
-
-
 };
 
 #endif // SNTP_H

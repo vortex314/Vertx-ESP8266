@@ -3,12 +3,19 @@
 #include <Wifi.h>
 
 Wifi::Wifi(const char *name) : VerticleTask(name,284,6) {};
-
+#include <lwip/api.h>
+#include <lwip/netif.h>
 void Wifi::run()
 {
+
     while (true) {
         uint8_t retries = 30;
         uint8_t status = 0;
+        // https://github.com/SuperHouse/esp-open-rtos/issues/333
+        sdk_wifi_station_disconnect();
+        netif_set_hostname(netif_default, "ikke");
+        sdk_wifi_station_connect();
+
         ZERO(config);
         strcpy((char *)config.ssid, WIFI_SSID);
         strcpy((char *)config.password, WIFI_PASS);
