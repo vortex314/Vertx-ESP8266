@@ -1,7 +1,7 @@
 #include "Property.h"
 
 uint32_t now;
-Property<uint32_t> nowProp("now",now,2000);
+PropertyReference<uint32_t> nowProp("now",now,2000);
 
 PropertyVerticle::PropertyVerticle(const char* name) : VerticleCoRoutine(name),_toMqttMsg(100),_topic(50),_message(100)
 {
@@ -20,6 +20,23 @@ void PropertyVerticle::start()
     VerticleCoRoutine::start();
 }
 
+void PropertyVerticle::sendProp(Property* p)
+{
+    _toMqttMsg.clear();
+    _topic.clear();
+    _message.clear();
+    _topic = "src/";
+    _topic += Sys::hostname();
+    _topic +="/";
+    _topic +=UID.label(_currentProp->_uid);
+    _currentProp->toJson(_message);
+
+    _toMqttMsg.put(H("topic"),_topic);
+    _toMqttMsg.put(H("message"),_message);
+    eb.publish("mqtt/publish",_toMqttMsg);
+    p->_timeout = Sys::millis()+p->_interval;
+}
+
 void PropertyVerticle::run()
 {
     crSTART(handle());
@@ -27,27 +44,18 @@ void PropertyVerticle::run()
         while ( !_mqttConnected ) {
             crDELAY(handle(),MS_TO_TICK(1000));
         };
+
         while(_mqttConnected ) {
-            if ( _currentProp == 0 ) _currentProp=PropertyBase::first();
-            if ( _currentProp ==0 ) {
-
-            } else  {
-                _toMqttMsg.clear();
-                _topic.clear();
-                _message.clear();
-                _topic = "src/";
-                _topic += Sys::hostname();
-                _topic +="/";
-                _topic +=UID.label(_currentProp->_uid);
-                _currentProp->toJson(_message);
-
-                _toMqttMsg.put(H("topic"),_topic);
-                _toMqttMsg.put(H("message"),_message);
-                eb.publish("mqtt/publish",_toMqttMsg);
+            _currentProp=Property::first();
+            while (_currentProp ) {
+                if ( _currentProp->_timeout < Sys::millis()) {
+                    sendProp(_currentProp);
+                    crDELAY(handle(),MS_TO_TICK(10));
+                }
                 _currentProp=_currentProp->next();
             }
             crDELAY(handle(),MS_TO_TICK(1000));
-        }
+        };
 
     }
     crEND();

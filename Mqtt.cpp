@@ -56,7 +56,7 @@ void Mqtt::start()
 
     new PropertyFunction<uint64_t> ("system/upTime",Sys::millis,1000);
     new PropertyFunction<uint32_t> ("system/heap",Sys::getFreeHeap,1000);
-    new Property<bool>("system/alive",alive,1000);
+    new PropertyReference<bool>("system/alive",alive,1000);
 }
 
 void Mqtt::do_connect()
@@ -71,7 +71,8 @@ void Mqtt::do_connect()
     ci.will_qos=1;
     ci.client_id =  Sys::hostname();
     ci.keep_alive=5;
-    INFO(" %X : mqtt connecting %X ",this,_client);
+
+    INFO(" mqtt connecting ");
     err = mqtt_client_connect(_client, &mqttServerIP, MQTT_PORT, mqtt_connection_cb, this, &ci);
     if(err != ERR_OK) {
         ERROR("%X : mqtt_connect return %d", this,err);
@@ -85,7 +86,7 @@ void Mqtt::mqtt_connection_cb(mqtt_client_t *client, void *arg, mqtt_connection_
 {
     Mqtt* me = (Mqtt*)arg;
     if(status == MQTT_CONNECT_ACCEPTED) {
-        INFO("%X : mqtt_connection_cb: Successfully connected",arg);
+        INFO(" mqtt successfully connected");
         me->signal(MQTT_CONNECTED);
         mqtt_set_inpub_callback(client, mqtt_incoming_publish_cb, mqtt_incoming_data_cb, me);
     } else {

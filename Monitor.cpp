@@ -31,7 +31,7 @@ char taskState(uint8_t eCurrentState)
 Monitor::Monitor(const char *name)
     : VerticleCoRoutine(name)
 {
-    new Property<uint32_t>("system/lowestStack",_lowestStack,5000);
+    new PropertyReference<uint32_t>("system/lowestStack",_lowestStack,5000);
 }
 
 void Monitor::run()

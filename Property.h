@@ -5,13 +5,15 @@
 #include <memory.h>
 #include <ArduinoJson.h>
 
-class PropertyBase : public LinkedList<PropertyBase>
+class Property : public LinkedList<Property>
 {
 public:
+    uint64_t _timeout;
     uid_t _uid;
     uint32_t _interval;
-    PropertyBase(const char* name,uint32_t interval) : _interval(interval) {
+    Property(const char* name,uint32_t interval) : _interval(interval) {
         _uid = UID.add(name);
+        _timeout = Sys::millis()+interval;
         add(this);
     }
     virtual void toJson(Str&) {};
@@ -19,16 +21,15 @@ public:
 };
 
 template <typename T>
-class Property : public PropertyBase
+class PropertyReference : public Property
 {
 public:
     T& _var;
 
-    Property(const char* name,T& var,uint32_t interval) : PropertyBase(name,interval),_var(var) {
-        _uid = UID.add(name);
+    PropertyReference(const char* name,T& var,uint32_t interval) : Property(name,interval),_var(var) {
     }
 
-    ~Property() {
+    ~PropertyReference() {
     }
     void toJson(Str& msg) {
         msg.append(_var);
@@ -36,21 +37,17 @@ public:
 };
 
 template <typename T>
-class PropertyFunction : public PropertyBase
+class PropertyFunction : public Property
 {
 public:
     std::function<T()> _f;
-    ;
 
-
-    PropertyFunction(const char* name,std::function<T ()> f,uint32_t interval) : PropertyBase(name,interval),_f(f) {
-        _uid = UID.add(name);
+    PropertyFunction(const char* name,std::function<T ()> f,uint32_t interval) : Property(name,interval),_f(f) {
     }
 
     ~PropertyFunction() {
     }
     void toJson(Str& msg) {
-        StaticJsonBuffer <200> js;
         msg.append(_f());
     }
 };
@@ -58,11 +55,12 @@ public:
 
 class PropertyVerticle : public VerticleCoRoutine
 {
-    PropertyBase* _currentProp;
+    Property* _currentProp;
     bool  _mqttConnected;
     Message _toMqttMsg;
     Str _topic;
     Str _message;
+    void sendProp(Property* p);
 public:
     PropertyVerticle(const char* name);
     void start();
