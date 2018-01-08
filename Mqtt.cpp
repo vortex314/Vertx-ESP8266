@@ -27,7 +27,7 @@ Mqtt::Mqtt(const char* name):VerticleTask(name,512,2) , _topicAlive(40),_topicIn
     UID.add("message");
 }
 
-
+static bool alive=true;
 
 void Mqtt::start()
 {
@@ -47,20 +47,16 @@ void Mqtt::start()
     });
 
     eb.on("mqtt/publish",[this](Message& msg) {
-        INFO(" request to publish  ");
-        if ( msg.get(H("topic"),_topicTxd) ) INFO(" found topic ");
-        if (msg.get(H("message"),_messageTxd)) INFO ("found message");
-
         if ( msg.get(H("topic"),_topicTxd) && msg.get(H("message"),_messageTxd)) {
-            INFO(" arg ok %s:%s",_topicTxd.c_str(),_messageTxd.c_str());
             signal(MQTT_DO_PUBLISH);
         }
     });
 
     VerticleTask::start();
-    
+
     new PropertyFunction<uint64_t> ("system/upTime",Sys::millis,1000);
     new PropertyFunction<uint32_t> ("system/heap",Sys::getFreeHeap,1000);
+    new Property<bool>("system/alive",alive,1000);
 }
 
 void Mqtt::do_connect()
@@ -69,16 +65,19 @@ void Mqtt::do_connect()
     ip_addr_t mqttServerIP;
     IP4_ADDR(&mqttServerIP, 192, 168, 0,177);
     err_t err;
-    memset(&ci, 0, sizeof(ci));
+    ZERO(ci);
+    ci.will_msg = "false";
+    ci.will_topic = _topicAlive.c_str();
+    ci.will_qos=1;
     ci.client_id =  Sys::hostname();
+    ci.keep_alive=5;
     INFO(" %X : mqtt connecting %X ",this,_client);
     err = mqtt_client_connect(_client, &mqttServerIP, MQTT_PORT, mqtt_connection_cb, this, &ci);
     if(err != ERR_OK) {
         ERROR("%X : mqtt_connect return %d", this,err);
         signal(MQTT_DISCONNECTED);
-    }  else {
-        signal(MQTT_FAILURE);
     }
+
 
 }
 
@@ -92,7 +91,7 @@ void Mqtt::mqtt_connection_cb(mqtt_client_t *client, void *arg, mqtt_connection_
     } else {
         ERROR("%s : Disconnected, reason: %d", __func__,status);
         me->_mqttConnected=false;
-        me->signal(MQTT_FAILURE);
+        me->signal(MQTT_DISCONNECTED);
     }
 }
 
@@ -177,6 +176,11 @@ void Mqtt::run()
             eb.publish("mqtt/connected");
             err_t err = mqtt_subscribe(_client, "src/+/system/alive", 1, mqtt_sub_request_cb, this);
             if ( err ) ERROR(" subscribe failed ");
+        };
+        if ( hasSignal(MQTT_DISCONNECTED)) {
+            _mqttConnected=false;
+            wait(1000);
+            do_connect();
         };
         if ( hasSignal(MQTT_SUBSCRIBED)) {
 

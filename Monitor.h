@@ -5,6 +5,7 @@
 
 class Monitor : public VerticleCoRoutine
 {
+    uint32_t _lowestStack;
 public:
     Monitor(const char *name);
 

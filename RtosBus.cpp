@@ -49,7 +49,7 @@ class CoRoutineTask : public VerticleTask
 {
 public:
     CoRoutineTask(const char *name)
-        : VerticleTask(name, 256, 1) {
+        : VerticleTask(name, 380, 1) {
     }
     void run() {
         while (true) {
