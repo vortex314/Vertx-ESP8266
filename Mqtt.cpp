@@ -5,10 +5,10 @@
 #define MQTT_HOST "limero.ddns.net"
 
 enum {
-    WIFI_CONNECTED=0,
-    WIFI_DISCONNECTED,
-    MQTT_CONNECTED,
-    MQTT_DISCONNECTED,
+    WIFI_CONNECTED=0,   // 1
+    WIFI_DISCONNECTED,  // 2
+    MQTT_CONNECTED, // 4
+    MQTT_DISCONNECTED, // 8
     MQTT_SUBSCRIBED,
     MQTT_PUBLISHED,
     MQTT_INCOMING,
@@ -36,14 +36,11 @@ void Mqtt::start()
     _topicAlive += "/system/alive";
 
     eb.on("wifi/connected",[this](Message& msg) {
-        _wifiConnected=true;
         signal(WIFI_CONNECTED);
     });
 
     eb.on("wifi/disconnected",[this](Message& msg) {
-        _wifiConnected=false;
         signal(WIFI_DISCONNECTED);
-        signal(MQTT_DISCONNECTED);
     });
 
     eb.on("mqtt/publish",[this](Message& msg) {
@@ -162,67 +159,118 @@ void Mqtt::mqtt_pub_request_cb(void *arg, err_t result)
 
 void Mqtt::run()
 {
-    TimerHandle_t th = xTimerCreate("mqtt",100/portTICK_PERIOD_MS,pdTRUE,this,timerHandler);
-    xTimerStart(th,0);
-    while(true) {
-        wait(500);
-        if ( hasSignal(MQTT_FAILURE)) {
-        };
-        if ( hasSignal(WIFI_CONNECTED)) {
-            _wifiConnected=true;
-            do_connect();
-        };
-        if ( hasSignal(MQTT_CONNECTED)) {
-            _mqttConnected=true;
-            eb.publish("mqtt/connected");
-            err_t err = mqtt_subscribe(_client, "src/+/system/alive", 1, mqtt_sub_request_cb, this);
-            if ( err ) ERROR(" subscribe failed ");
-        };
-        if ( hasSignal(MQTT_DISCONNECTED)) {
-            _mqttConnected=false;
-            wait(1000);
-            do_connect();
-        };
-        if ( hasSignal(MQTT_SUBSCRIBED)) {
-
-        };
-        if ( hasSignal(MQTT_PUBLISHED)) {
-
-        };
-        if ( hasSignal(MQTT_INCOMING)) {
-
-        };
-        if ( hasSignal(MQTT_DISCONNECTED)) {
-            _mqttConnected=false;
-            eb.publish("mqtt/disconnected");
-        };
-        if ( hasSignal(WIFI_DISCONNECTED)) {
-            _wifiConnected=false;
-        };
-        if ( hasSignal(MQTT_DO_PUBLISH) && _mqttConnected ) {
-            publish(_topicTxd,_messageTxd);
-        } /*else if ( (n& (1<<SIGNAL_TIMER) ) && _mqttConnected ) { // timeout
-            _message.clear();
-            if( cnt==0 ) {
-                _message="true";
-                publish(_topicAlive,_message);
-            } else if ( cnt==1) {
-                _topic = "src/";
-                _topic += Sys::hostname();
-                _topic += "/system/upTime";
-                _message.append(Sys::millis());
-                publish(_topic,_message);
-            } else if ( cnt==2) {
-                _topic = "src/";
-                _topic += Sys::hostname();
-                _topic += "/system/heap";
-                _message.append(Sys::getFreeHeap());
-                publish(_topic,_message);
+//   TimerHandle_t th = xTimerCreate("mqtt",100/portTICK_PERIOD_MS,pdTRUE,this,timerHandler);
+//   xTimerStart(th,0);
+    while (true) {
+        // WIFI_DISCONNECTED
+WIFI_DISCONNECTED: {
+            while (true) {
+                wait(1000);
+                if ( hasSignal( WIFI_CONNECTED)) {
+                    INFO(" wifi connected ");
+                    goto WIFI_CONNECTED;
+                }
             }
-            if (cnt++==3 ) cnt=0;
+        };
+WIFI_CONNECTED : {
+MQTT_DISCONNECTED : {
+                _mqttConnected=false;
+                while ( true) {
+                    do_connect();
+                    wait(1000);
+                    if ( hasSignal(WIFI_DISCONNECTED ) )goto WIFI_DISCONNECTED;
+                    if ( hasSignal(MQTT_CONNECTED) ) goto MQTT_CONNECTED;
+                    if ( hasSignal(MQTT_FAILURE )) {
+                        wait(1000);
+                    }
+                };
+MQTT_CONNECTED  : {
+                    _mqttConnected=true;
+                    eb.publish("mqtt/connected");
+                    while(true) {
 
-        }*/
-
+                        err_t err = mqtt_subscribe(_client, "src/+/system/alive", 1, mqtt_sub_request_cb, this);
+                        if ( err ) {
+                            ERROR(" subscribe failed ");
+                        }
+                        wait(1000);
+                        if ( hasSignal(WIFI_DISCONNECTED) ) goto WIFI_DISCONNECTED;
+                        if ( hasSignal(MQTT_DISCONNECTED) ) goto MQTT_DISCONNECTED;
+                        if ( hasSignal(MQTT_SUBSCRIBED) ) goto MQTT_PUBLISHING;
+                        wait(1000);
+                    }
+                }
+MQTT_PUBLISHING : {
+                    while(true) {
+                        wait(1000);
+                        if ( hasSignal(WIFI_DISCONNECTED ) )goto WIFI_DISCONNECTED;
+                        if ( hasSignal(MQTT_DISCONNECTED) ) goto MQTT_DISCONNECTED;
+                        if ( hasSignal(MQTT_DO_PUBLISH) ) {
+                            publish(_topicTxd,_messageTxd);
+                        }
+                    }
+                }
+            }
+        }
     }
+    /*
+    while(true) {
+    wait(500);
+    if ( hasSignal(MQTT_FAILURE)) {
+    };
+    if ( hasSignal(WIFI_CONNECTED)) {
+    _wifiConnected=true;
+    do_connect();
+    };
+    if ( hasSignal(MQTT_CONNECTED)) {
+    _mqttConnected=true;
+    eb.publish("mqtt/connected");
+    err_t err = mqtt_subscribe(_client, "src/+/system/alive", 1, mqtt_sub_request_cb, this);
+    if ( err ) ERROR(" subscribe failed ");
+    };
+    if ( hasSignal(MQTT_DISCONNECTED)) {
+    _mqttConnected=false;
+    wait(1000);
+    do_connect();
+    };
+    if ( hasSignal(MQTT_SUBSCRIBED)) {
+
+    };
+    if ( hasSignal(MQTT_PUBLISHED)) {
+
+    };
+    if ( hasSignal(MQTT_INCOMING)) {
+
+    };
+    if ( hasSignal(MQTT_DISCONNECTED)) {
+    _mqttConnected=false;
+    eb.publish("mqtt/disconnected");
+    };
+    if ( hasSignal(WIFI_DISCONNECTED)) {
+    _wifiConnected=false;
+    };
+    if ( hasSignal(MQTT_DO_PUBLISH) && _mqttConnected ) {
+    publish(_topicTxd,_messageTxd);
+    } *//*else if ( (n& (1<<SIGNAL_TIMER) ) && _mqttConnected ) { // timeout
+_message.clear();
+if( cnt==0 ) {
+_message="true";
+publish(_topicAlive,_message);
+} else if ( cnt==1) {
+_topic = "src/";
+_topic += Sys::hostname();
+_topic += "/system/upTime";
+_message.append(Sys::millis());
+publish(_topic,_message);
+} else if ( cnt==2) {
+_topic = "src/";
+_topic += Sys::hostname();
+_topic += "/system/heap";
+_message.append(Sys::getFreeHeap());
+publish(_topic,_message);
+}
+if (cnt++==3 ) cnt=0;
+
+}*/
 
 }

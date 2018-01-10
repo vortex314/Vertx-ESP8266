@@ -39,8 +39,8 @@ public:
     //   virtual void onInterrupt() = 0;
 };
 
-#define SIGNAL_MESSAGE 0
-#define SIGNAL_TIMER 1
+#define SIGNAL_MESSAGE (1<<31)
+#define SIGNAL_TIMER (1<<30)
 
 class VerticleTask : public Verticle
 {

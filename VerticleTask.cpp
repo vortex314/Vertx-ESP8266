@@ -52,9 +52,7 @@ void VerticleTask::stop()
 
 void VerticleTask::onMessage(Cbor &msg)
 {
-    // copy message
-    // awake thread
-    signalSys(SIGNAL_MESSAGE);
+    signal(SIGNAL_MESSAGE);
     INFO(" received message in %s , default handler invoked.", _name);
 }
 
@@ -66,12 +64,7 @@ uint32_t VerticleTask::newEvent()
 
 void VerticleTask::signal(uint32_t n)
 {
-    signalSys(n+2); // 2 bits reserved
-}
-
-void VerticleTask::signalSys(uint32_t n)
-{
-    DEBUG(" sending notification %d to %s",n,name());
+    DEBUG(" sending notification %d to %s",1<<n,name());
     if ( _taskHandle )
         xTaskNotify(_taskHandle, 1<<n, eSetBits);
 }
@@ -79,14 +72,17 @@ void VerticleTask::signalSys(uint32_t n)
 uint32_t VerticleTask::wait(uint32_t time)
 {
     xTaskNotifyWait(0x00, UINT32_MAX, &_lastNotify, time/portTICK_PERIOD_MS);
-    if (_lastNotify)
-        DEBUG(" %s notification received %d", _name, _lastNotify);
+    if (_lastNotify) {
+        DEBUG(" %s : notification received %d", _name, _lastNotify);
+    } else {
+        DEBUG(" %s : timeout wait() ",_name);
+    }
     return _lastNotify;
 }
 
 bool VerticleTask::hasSignal(uint32_t sig)
 {
-    return ( _lastNotify & (1<<(sig+2)));
+    return ( _lastNotify & (1<<(sig)));
 }
 
 
@@ -94,7 +90,7 @@ bool VerticleTask::hasSignal(uint32_t sig)
 void VerticleTask::timerHandler(TimerHandle_t th)
 {
     VerticleTask *pv = (VerticleTask *)pvTimerGetTimerID(th);
-    pv->signalSys(SIGNAL_TIMER);
+    pv->signal(SIGNAL_TIMER);
     DEBUG(" TIMER FIRED ");
 }
 
