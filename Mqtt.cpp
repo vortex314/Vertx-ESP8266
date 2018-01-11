@@ -161,7 +161,7 @@ void Mqtt::run()
 {
 //   TimerHandle_t th = xTimerCreate("mqtt",100/portTICK_PERIOD_MS,pdTRUE,this,timerHandler);
 //   xTimerStart(th,0);
-    while (true) {
+    while (true) { // FSM MQTT Connection
         // WIFI_DISCONNECTED
 WIFI_DISCONNECTED: {
             while (true) {
@@ -213,64 +213,4 @@ MQTT_PUBLISHING : {
             }
         }
     }
-    /*
-    while(true) {
-    wait(500);
-    if ( hasSignal(MQTT_FAILURE)) {
-    };
-    if ( hasSignal(WIFI_CONNECTED)) {
-    _wifiConnected=true;
-    do_connect();
-    };
-    if ( hasSignal(MQTT_CONNECTED)) {
-    _mqttConnected=true;
-    eb.publish("mqtt/connected");
-    err_t err = mqtt_subscribe(_client, "src/+/system/alive", 1, mqtt_sub_request_cb, this);
-    if ( err ) ERROR(" subscribe failed ");
-    };
-    if ( hasSignal(MQTT_DISCONNECTED)) {
-    _mqttConnected=false;
-    wait(1000);
-    do_connect();
-    };
-    if ( hasSignal(MQTT_SUBSCRIBED)) {
-
-    };
-    if ( hasSignal(MQTT_PUBLISHED)) {
-
-    };
-    if ( hasSignal(MQTT_INCOMING)) {
-
-    };
-    if ( hasSignal(MQTT_DISCONNECTED)) {
-    _mqttConnected=false;
-    eb.publish("mqtt/disconnected");
-    };
-    if ( hasSignal(WIFI_DISCONNECTED)) {
-    _wifiConnected=false;
-    };
-    if ( hasSignal(MQTT_DO_PUBLISH) && _mqttConnected ) {
-    publish(_topicTxd,_messageTxd);
-    } *//*else if ( (n& (1<<SIGNAL_TIMER) ) && _mqttConnected ) { // timeout
-_message.clear();
-if( cnt==0 ) {
-_message="true";
-publish(_topicAlive,_message);
-} else if ( cnt==1) {
-_topic = "src/";
-_topic += Sys::hostname();
-_topic += "/system/upTime";
-_message.append(Sys::millis());
-publish(_topic,_message);
-} else if ( cnt==2) {
-_topic = "src/";
-_topic += Sys::hostname();
-_topic += "/system/heap";
-_message.append(Sys::getFreeHeap());
-publish(_topic,_message);
-}
-if (cnt++==3 ) cnt=0;
-
-}*/
-
 }
