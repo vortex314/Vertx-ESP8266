@@ -21,7 +21,7 @@ void VerticleTask::run()
 {
     while (true) {
         INFO(" default  run()   : %s : %X ", _name, this);
-        wait(1000);
+        waitSignal(1000);
     }
 }
 
@@ -49,12 +49,12 @@ void VerticleTask::stop()
 {
     vTaskSuspend( _taskHandle );
 }
-
+/*
 void VerticleTask::onMessage(Cbor &msg)
 {
     signal(SIGNAL_MESSAGE);
     INFO(" received message in %s , default handler invoked.", _name);
-}
+} */
 
 uint32_t VerticleTask::newEvent()
 {
@@ -64,12 +64,12 @@ uint32_t VerticleTask::newEvent()
 
 void VerticleTask::signal(uint32_t n)
 {
-    DEBUG(" sending notification %d to %s",1<<n,name());
+    INFO(" signal %d to %s",n,name());
     if ( _taskHandle )
         xTaskNotify(_taskHandle, 1<<n, eSetBits);
 }
 
-uint32_t VerticleTask::wait(uint32_t time)
+uint32_t VerticleTask::waitSignal(uint32_t time)
 {
     xTaskNotifyWait(0x00, UINT32_MAX, &_lastNotify, time/portTICK_PERIOD_MS);
     if (_lastNotify) {

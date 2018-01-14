@@ -30,7 +30,8 @@ public:
     };
     virtual void start() { };
     virtual void stop() {};
-    virtual void onMessage(Cbor &msg) {};
+    virtual void run();
+//    virtual void onMessage(Cbor &msg) {};
     virtual bool isTask() {
         return false;
     };
@@ -39,8 +40,8 @@ public:
     //   virtual void onInterrupt() = 0;
 };
 
-#define SIGNAL_MESSAGE (1<<31)
-#define SIGNAL_TIMER (1<<30)
+#define SIGNAL_MESSAGE 31
+#define SIGNAL_TIMER 30
 
 class VerticleTask : public Verticle
 {
@@ -55,14 +56,14 @@ public:
     const char *name();
     virtual void run();
     virtual void start();
-    virtual void onMessage(Cbor &msg);
+//   virtual void onMessage(Cbor &msg);
     void stop();
     uint32_t newEvent();
 
     void signal(uint32_t  n);
-    void signalSys(uint32_t n);
+//    void signalSys(uint32_t n);
     bool hasSignal(uint32_t n);
-    uint32_t wait(uint32_t time);
+    uint32_t waitSignal(uint32_t time);
     bool isTask() {
         return true;
     };
@@ -80,22 +81,75 @@ typedef void (*StaticHandler)(Cbor &);
 class VerticleCoRoutine : public Verticle
 {
     char *_name;
-    CoRoutineHandle_t _xHandle;
+//    CoRoutineHandle_t _xHandle;
+
+
+protected:
+    unsigned short _ptLine=0;
+    uint64_t __timeout;
+    uint32_t _signal;
 
 public:
     VerticleCoRoutine(const char *name) ;
-    CoRoutineHandle_t getHandle();
-    inline CoRoutineHandle_t handle() {
-        return _xHandle;
-    };
+    /*   CoRoutineHandle_t getHandle();
+       inline CoRoutineHandle_t handle() {
+           return _xHandle;
+       };*/
     const char* name();
     virtual void run();
-    static void handler(CoRoutineHandle_t xHandle, UBaseType_t uxIndex);
+//    static void handler(CoRoutineHandle_t xHandle, UBaseType_t uxIndex);
+    static void loop();
     void start();
     void stop();
-    void onMessage(Cbor &msg);
+    void signal(uint32_t s);
+    bool hasSignal(uint32_t s);
+//    void onMessage(Cbor &msg);
     bool isTask();
+    inline void timeout(uint32_t t) {
+        __timeout = Sys::millis()+t;
+    }
+    inline uint64_t timeout() {
+        return __timeout;
+    }
+    inline uint32_t signal() {
+        return _signal;
+    }
 };
+
+
+// Declare start of protothread (use at start of Run() implementation).
+#define PT_BEGIN() bool ptYielded = true; switch (_ptLine) { case 0:
+// Stop protothread and end it (use at end of Run() implementation).
+#define PT_END() default:  ;} stop(); return ;(void)ptYielded;
+// Cause protothread to wait until given condition is true.
+#define PT_WAIT_UNTIL(condition) \
+    do { _ptLine = __LINE__; case __LINE__: \
+        if (!(condition)) return ; } while (0)
+#define PT_WAIT_SIGNAL(___time)  \
+    do { _signal=0;timeout(___time);_ptLine = __LINE__; case __LINE__: \
+        if (!(_signal)) return ; } while (0)
+#define PT_WAIT(___time)  \
+    do { _signal=0;timeout(___time);_ptLine = __LINE__; case __LINE__: \
+        if (!hasSignal(SIGNAL_TIMER) )return ; } while (0)
+// Cause protothread to wait while given condition is true.
+#define PT_WAIT_WHILE(condition) PT_WAIT_UNTIL(!(condition))
+// Cause protothread to wait until given child protothread completes.
+#define PT_WAIT_THREAD(child) PT_WAIT_WHILE((child).dispatch(msg))
+// Restart and spawn given child protothread and wait until it completes.
+#define PT_SPAWN(child) \
+    do { (child).restart(); PT_WAIT_THREAD(child); } while (0)
+// Restart protothread's execution at its PT_BEGIN.
+#define PT_RESTART() do { restart(); return ; } while (0)
+// Stop and exit from protothread.
+#define PT_EXIT() do { stop(); return ; } while (0)
+// Yield protothread till next call to its Run().
+#define PT_YIELD() \
+    do { ptYielded = false; _ptLine = __LINE__; case __LINE__: \
+        if (!ptYielded) return ; } while (0)
+// Yield protothread until given condition is true.
+#define PT_YIELD_UNTIL(condition) \
+    do { ptYielded = false; _ptLine = __LINE__; case __LINE__: \
+        if (!ptYielded || !(condition)) return ; } while (0)
 
 
 

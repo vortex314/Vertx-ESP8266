@@ -36,11 +36,12 @@ Monitor::Monitor(const char *name)
 
 void Monitor::run()
 {
-    crSTART(handle());
+    PT_BEGIN();
     while (true) {
-        crDELAY(handle(),5000);
+        PT_WAIT_SIGNAL(5000);
         _lowestStack = 100000;
-        INFO(" free heap : %d", xPortGetFreeHeapSize());
+
+        INFO(" freeRTOS heap : %d  heap SDK : %d ", xPortGetFreeHeapSize(), sdk_system_get_free_heap_size());
         INFO(" Address  | S |   TASK     |  STACK | prio");
         INFO("----------|---|------------|--------|-------");
         for (Verticle *v = first(); v != 0; v = v->next()) {
@@ -55,12 +56,18 @@ void Monitor::run()
                          uxTaskGetStackHighWaterMark(th),
                          uxTaskPriorityGet(th));
                 if ( uxTaskGetStackHighWaterMark(th) < _lowestStack ) _lowestStack = uxTaskGetStackHighWaterMark(th);
-            } else {
+            }
+        }
+        INFO(" Address  | S |   TASK     |  timeout | signals");
+        INFO("----------|---|------------|----------|-------");
+        for (Verticle *v = first(); v != 0; v = v->next()) {
+            if (!v->isTask()) {
+
                 VerticleCoRoutine *vc = (VerticleCoRoutine *)v;
-                INFO(" %8X | - | %10s |  ", vc->getHandle(),
-                     v->name());
+                INFO(" %8X | - | %10s |  %8ld  | %X", vc,
+                     vc->name(),vc->timeout(),vc->signal());
             }
         }
     }
-    crEND();
+    PT_END();
 }

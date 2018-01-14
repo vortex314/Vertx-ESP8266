@@ -48,7 +48,7 @@ void Sntp::start()
 void Sntp::run()
 {
     while(true) {
-        wait(20000);
+        waitSignal(20000);
         if ( hasSignal(WIFI_CONNECTED)) {
             INFO(" Starting SNTP ");
             const char *servers[] = {SNTP_SERVERS};

@@ -3,6 +3,9 @@
 uint32_t now;
 PropertyReference<uint32_t> nowProp("now",now,2000);
 
+#define MQTT_CONNECTED 0
+#define MQTT_DISCONNECTED 1
+
 PropertyVerticle::PropertyVerticle(const char* name) : VerticleCoRoutine(name),_toMqttMsg(100),_topic(50),_message(100)
 {
     _currentProp=0;
@@ -39,24 +42,28 @@ void PropertyVerticle::sendProp(Property* p)
 
 void PropertyVerticle::run()
 {
-    crSTART(handle());
+//   INFO("%X ",signal());
+    PT_BEGIN();
     while(true) {
-        while ( !_mqttConnected ) {
-            crDELAY(handle(),MS_TO_TICK(1000));
-        };
+        INFO("0");
+        while(!_mqttConnected) {
+            PT_WAIT(1000);
+//            INFO("1");
+        }
 
         while(_mqttConnected ) {
+//           INFO("2");
             _currentProp=Property::first();
             while (_currentProp ) {
                 if ( _currentProp->_timeout < Sys::millis()) {
                     sendProp(_currentProp);
-                    crDELAY(handle(),MS_TO_TICK(10));
+                    PT_WAIT(10);
                 }
                 _currentProp=_currentProp->next();
             }
-            crDELAY(handle(),MS_TO_TICK(1000));
+            PT_WAIT(1000);
         };
 
     }
-    crEND();
+    PT_END();
 }

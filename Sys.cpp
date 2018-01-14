@@ -14,58 +14,88 @@ uint64_t Sys::_upTime;
 
 void Sys::init()
 {
-  // uint8_t cpuMhz = sdk_system_get_cpu_frequency();
+    // uint8_t cpuMhz = sdk_system_get_cpu_frequency();
 }
 
-uint32_t Sys::getFreeHeap() { return xPortGetFreeHeapSize(); };
+uint32_t Sys::getFreeHeap()
+{
+    return xPortGetFreeHeapSize();
+};
 
 char Sys::_hostname[30];
 uint64_t Sys::_boot_time = 0;
 uint64_t Sys::millis()
 {
-  /*
-  timeval time;
-  gettimeofday(&time, NULL);
-  return (time.tv_sec * 1000) + (time.tv_usec / 1000);*/
-  return Sys::micros() / 1000;
+    /*
+    timeval time;
+    gettimeofday(&time, NULL);
+    return (time.tv_sec * 1000) + (time.tv_usec / 1000);*/
+    return Sys::micros() / 1000;
 }
+#include <FreeRTOS.h>
+#include <task.h>
 uint64_t Sys::micros()
 {
-  static uint32_t lsClock = 0;
-  static uint32_t msClock = 0;
 
-  uint32_t ccount;
-  __asm__ __volatile__("esync; rsr %0,ccount"
-                       : "=a"(ccount));
-  if (ccount < lsClock)
-  {
-    msClock++;
-  }
-  lsClock = ccount;
-  uint64_t micros = msClock;
-  micros <<= 32;
-  micros += lsClock;
-  return micros / 80;
+    static uint32_t lsClock = 0;
+    static uint32_t msClock = 0;
+
+
+    taskENTER_CRITICAL(  );
+    uint32_t ccount;
+    __asm__ __volatile__("esync; rsr %0,ccount"
+                         : "=a"(ccount));
+    if (ccount < lsClock) {
+        msClock++;
+    }
+    lsClock = ccount;
+    taskEXIT_CRITICAL(  );
+
+
+    uint64_t micros = msClock;
+    micros <<= 32;
+    micros += lsClock;
+
+    return micros / 80;
+
 }
 
-uint64_t Sys::now() { return _boot_time + Sys::millis(); }
+uint64_t Sys::now()
+{
+    return _boot_time + Sys::millis();
+}
 
-void Sys::setNow(uint64_t n) { _boot_time = n - Sys::millis(); }
+void Sys::setNow(uint64_t n)
+{
+    _boot_time = n - Sys::millis();
+}
 
-void Sys::hostname(const char *h) { strncpy(_hostname, h, strlen(h) + 1); }
+void Sys::hostname(const char *h)
+{
+    strncpy(_hostname, h, strlen(h) + 1);
+}
 
-void Sys::setHostname(const char *h) { strncpy(_hostname, h, strlen(h) + 1); }
+void Sys::setHostname(const char *h)
+{
+    strncpy(_hostname, h, strlen(h) + 1);
+}
 
 void Sys::delay(unsigned int delta)
 {
-  uint32_t end = Sys::millis() + delta;
-  while (Sys::millis() < end)
-    ;
+    uint32_t end = Sys::millis() + delta;
+    while (Sys::millis() < end)
+        ;
 }
 
-extern "C" uint64_t SysMillis() { return Sys::millis(); }
+extern "C" uint64_t SysMillis()
+{
+    return Sys::millis();
+}
 
-const char *Sys::hostname() { return _hostname; }
+const char *Sys::hostname()
+{
+    return _hostname;
+}
 
 /*
  *
@@ -80,9 +110,12 @@ const char *Sys::hostname() { return _hostname; }
 
 uint32_t Sys::getFreeHeap()
 {
-  return ESP.getFreeHeap();
+    return ESP.getFreeHeap();
 }
 
-uint64_t Sys::millis() { return ::millis(); }
+uint64_t Sys::millis()
+{
+    return ::millis();
+}
 
 #endif

@@ -78,5 +78,4 @@ void EventBus::eventLoop()
 
         }
     }
-    return;
 }

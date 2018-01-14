@@ -12,22 +12,22 @@ void Wifi::run()
         uint8_t retries = 30;
         uint8_t status = 0;
         // https://github.com/SuperHouse/esp-open-rtos/issues/333
-        sdk_wifi_station_disconnect();
-        netif_set_hostname(netif_default, "ikke");
-        sdk_wifi_station_connect();
 
         ZERO(config);
         strcpy((char *)config.ssid, WIFI_SSID);
         strcpy((char *)config.password, WIFI_PASS);
         INFO("WiFi: connecting to WiFi");
-        wait(5000);
+//        waitSignal(1000);
 DISCONNECTED : {
             INFO("WiFi: disconnected");
             eb.publish("wifi/disconnected");
             while(true) {
                 retries=30;
+                sdk_wifi_station_disconnect();
+                netif_set_hostname(netif_default, Sys::hostname());
                 sdk_wifi_set_opmode(STATION_MODE);
                 sdk_wifi_station_set_config(&config);
+                sdk_wifi_station_connect();
                 while (true) {
                     status = sdk_wifi_station_get_connect_status();
                     if ( status == STATION_GOT_IP ) goto CONNECTED;
@@ -44,9 +44,8 @@ DISCONNECTED : {
                     }
                     --retries;
                     if ( retries==0) break;
-                    wait(1000);
+                    waitSignal(1000);
                 }
-                sdk_wifi_station_disconnect();
             }
         }
 CONNECTED : {
@@ -55,7 +54,7 @@ CONNECTED : {
             while (true) {
                 status = sdk_wifi_station_get_connect_status();
                 if ( status == STATION_GOT_IP) {
-                    wait(1000);
+                    waitSignal(1000);
                 } else {
                     sdk_wifi_station_disconnect();
                     goto DISCONNECTED;

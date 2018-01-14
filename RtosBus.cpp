@@ -14,7 +14,7 @@
 
 #include <Wifi.h>
 #include <Telnet.h>
-//#include <Mqtt.h>
+#include <Mqtt.h>
 #include <Monitor.h>
 #include <LedBlinker.h>
 #include <Sntp.h>
@@ -49,12 +49,13 @@ class CoRoutineTask : public VerticleTask
 {
 public:
     CoRoutineTask(const char *name)
-        : VerticleTask(name, 380, 1) {
+        : VerticleTask(name, 500, 1) {
     }
     void run() {
         while (true) {
-            vCoRoutineSchedule();
+//            vCoRoutineSchedule();
             eb.eventLoop();
+            VerticleCoRoutine::loop();
         }
     }
 };
@@ -75,12 +76,11 @@ public:
     }
     void run() {
         while (true) {
-            wait(1000);
+            waitSignal(1000);
             //            EventBus::eventLoop();
         }
     }
 };
-#include <Mqtt.h>
 
 
 EventBus eb(1024);
@@ -120,12 +120,12 @@ public:
         VerticleCoRoutine::start();
     }
     void run() {
-        crSTART(handle());
+        PT_BEGIN();
         for (;;) {
-            crDELAY(handle(), 10000);
+            PT_WAIT_SIGNAL(10000);
             INFO("_____________________________________________", name());
         }
-        crEND();
+        PT_END();
     }
 };
 

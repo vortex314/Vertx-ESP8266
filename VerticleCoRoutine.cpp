@@ -12,20 +12,22 @@ const char *VerticleCoRoutine::name()
 {
     return _name;
 }
-CoRoutineHandle_t VerticleCoRoutine::getHandle()
-{
-    return _xHandle;
-}
+
 void VerticleCoRoutine::run()
 {
-    crSTART(handle());
+    PT_BEGIN();
     for (;;) {
-        crDELAY(handle(), 10000);
-        INFO(" coroutine-%s running default.", name());
+        PT_WAIT_SIGNAL(10000);
+        if ( hasSignal(SIGNAL_TIMER)) {
+            INFO(" coroutine-%s running default.", name());
+        } else {
+            INFO(" I received a wakeup call !!");
+        }
+        PT_YIELD();
     }
-    crEND();
+    PT_END();
 }
-void VerticleCoRoutine::handler(CoRoutineHandle_t xHandle, UBaseType_t uxIndex)
+/*void VerticleCoRoutine::handler(CoRoutineHandle_t xHandle, UBaseType_t uxIndex)
 {
     VerticleCoRoutine *pvc = (VerticleCoRoutine *)uxIndex;
     pvc->_xHandle = xHandle;
@@ -35,13 +37,40 @@ void VerticleCoRoutine::handler(CoRoutineHandle_t xHandle, UBaseType_t uxIndex)
 void VerticleCoRoutine::start()
 {
     xCoRoutineCreate(handler, 0, (UBaseType_t)this);
+}*/
+void VerticleCoRoutine::start()
+{
+
 }
 void VerticleCoRoutine::stop()
 {
 }
-void VerticleCoRoutine::onMessage(Cbor &msg)
+void VerticleCoRoutine::loop()
 {
+    Verticle *pv;
+    for( pv = Verticle::first(); pv; pv=pv->next()) {
+        if ( !pv->isTask()) {
+
+            VerticleCoRoutine* pvcr = (VerticleCoRoutine*)pv;
+            if ( Sys::millis() >  pvcr->__timeout ) pvcr->signal(SIGNAL_TIMER); // set timeout if needed
+            if ( pvcr->_signal ) {
+//                INFO(" calling %s : %X : %ld ",pvcr->name(),pvcr->_signal,pvcr->__timeout);
+                pvcr->run();
+            }
+        }
+    }
 }
+
+void VerticleCoRoutine::signal(uint32_t sign)
+{
+    _signal |= (1 << sign);
+}
+
+bool VerticleCoRoutine::hasSignal(uint32_t sign)
+{
+    return _signal & (1<<sign);
+}
+
 bool VerticleCoRoutine::isTask()
 {
     return false;

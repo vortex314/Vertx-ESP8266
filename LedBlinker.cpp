@@ -5,23 +5,23 @@ LedBlinker::LedBlinker(const char *name)
     : VerticleCoRoutine(name)
 {
     _gpio = 2;
-    _interval=100/portTICK_PERIOD_MS;
+    _interval=100;
 }
 
 void LedBlinker::run()
 {
-    crSTART(handle());
+    PT_BEGIN();
     gpio_enable(_gpio, GPIO_OUTPUT);
 
     while (true) {
-        crDELAY(handle(),_interval);
+        PT_WAIT_SIGNAL(_interval);
         gpio_write(_gpio, 1);
 
-        crDELAY(handle(),_interval);
+        PT_WAIT_SIGNAL(_interval);
         gpio_write(_gpio, 0);
 
     }
-    crEND();
+    PT_END();
 }
 
 void LedBlinker::setGpio(uint32_t gpio)
@@ -31,5 +31,6 @@ void LedBlinker::setGpio(uint32_t gpio)
 
 void LedBlinker::setInterval(uint32_t interval)
 {
-    _interval=interval/portTICK_PERIOD_MS;
+    INFO(" %s  => interval : %d ",name(),interval);
+    _interval=interval;
 }
