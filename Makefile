@@ -1,5 +1,5 @@
 PROGRAM=vertx-esp8266
-EXTRA_COMPONENTS = extras/sntp extras/mdnsresponder ../Common  ../ArduinoJson  extras/paho_mqtt_c
+EXTRA_COMPONENTS = extras/sntp extras/mdnsresponder ../Common  ../ArduinoJson  extras/paho_mqtt_c 
 # EXTRA_COMPONENTS = extras/paho_mqtt_c ../Common ../Ebos ../ArduinoJson
 PROGRAM_SRC_DIR=. 
 PROGRAM_INC_DIR=. ../esp-open-rtos/include ../Common  ../ArduinoJson 

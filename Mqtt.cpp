@@ -155,7 +155,7 @@ void Mqtt::run()
                         INFO("error while publishing message: %d", _ret );
                         break;
                     }
-                    _ret = mqtt_yield(&_client, 1);
+                    _ret = mqtt_yield(&_client, 10);
                     if (_ret == MQTT_DISCONNECTED) {
                         _mqttConnected=false;
                     }
@@ -187,7 +187,12 @@ goto WIFI_CONNECTED;
 WIFI_CONNECTED : {
 MQTT_DISCONNECTED : {
 _mqttConnected=false;
-//              mqtt_disconnect(_client);
+//              mqtt_disconnect(_client);MESSAGE: Entering directory `/home/lieven/workspace/vertx-esp8266'
+/bin/sh -c 'make -j4'
+----------Building project:[ vertx-esp8266 - Debug_Linux ]----------
+C++ /home/lieven/workspace/vertx-esp8266/Mqtt.cpp
+/home/lieven/workspace/vertx-esp8266/Mqtt.cpp: In member function 'bool Mqtt::do_connect()':
+
 while ( true) {
 do_connect();
 waitSignal(2000);

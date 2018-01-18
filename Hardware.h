@@ -5,8 +5,7 @@
 
 class Bytes;
 
-namespace HW
-{
+
 
 typedef void (*FunctionPointer)(void *);
 
@@ -98,25 +97,35 @@ public:
     virtual Erc read(uint8_t *data, uint32_t size) = 0;
 };
 
-class SPI : public Driver
+class Spi : public Driver
 {
 public:
-    typedef enum { SPI_MODE_0,
-                   SPI_MODE_1,
-                   SPI_MODE_2,
-                   SPI_MODE_3
-                 } SPIMode;
+    typedef enum {  SPI_MODE_PHASE0_POL0 =0,
+                    SPI_MODE_PHASE1_POL0= 1,
+                    SPI_MODE_PHASE0_POL1= 2,
+                    SPI_MODE_PHASE1_POL1= 3
+                 } SpiMode;
+    typedef enum {
+        SPI_CLOCK_125K=125000,
+        SPI_CLOCK_250K=250000,
+        SPI_CLOCK_500K=500000,
+        SPI_CLOCK_1M=1000000,
+        SPI_CLOCK_2M=2000000,
+        SPI_CLOCK_4M=4000000,
+        SPI_CLOCK_10M=10000000
+    } SpiClock;
 
-    static SPI &create(PhysicalPin miso, PhysicalPin mosi, PhysicalPin sck,
+    static Spi &create(PhysicalPin miso, PhysicalPin mosi, PhysicalPin sck,
                        PhysicalPin cs);
-    ~SPI();
+    ~Spi();
     virtual Erc init() = 0;
     virtual Erc deInit() = 0;
     virtual Erc exchange(Bytes &in, Bytes &out) = 0;
     virtual Erc onExchange(FunctionPointer, void *) = 0;
     virtual Erc setClock(uint32_t) = 0;
-    virtual Erc setMode(SPIMode) = 0;
+    virtual Erc setMode(SpiMode) = 0;
     virtual Erc setLsbFirst(bool) = 0;
+    virtual Erc setHwSelect(bool)=0;
 };
 
 class ADC
@@ -135,7 +144,7 @@ class Connector
     uint32_t _connectorIdx;
     uint32_t _physicalPins[8];
     UART *_uart;
-    SPI *_spi;
+    Spi *_spi;
     I2C *_i2c;
 
 private:
@@ -149,7 +158,7 @@ private:
 public:
     Connector(uint32_t idx);
     UART &getUART();
-    SPI &getSPI();
+    Spi &getSpi();
     I2C &getI2C();
     DigitalIn &getDigitalIn(LogicalPin);
     DigitalOut &getDigitalOut(LogicalPin);
@@ -157,6 +166,6 @@ public:
     // PWM& getPWM();
 };
 
-}
+
 
 #endif

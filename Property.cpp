@@ -61,7 +61,7 @@ void PropertyVerticle::run()
                 }
                 _currentProp=_currentProp->next();
             }
-            PT_WAIT(1000);
+            PT_WAIT(100);
         };
 
     }

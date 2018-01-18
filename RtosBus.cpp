@@ -35,7 +35,7 @@ The Router receives messages  and sends them  to subscribers or destinations
     Header : dst
 
 */
-extern "C" void __cxa_pure_virtua2l()
+extern "C" void __cxa_pure_virtual()
 {
     while (1) {
         ERROR(" pure virtual called !!");
@@ -98,7 +98,9 @@ Task task("task");
 Mdns mdns("mdns");
 PropertyVerticle propSender("props");
 
+#include <SpiVerticle.h>
 
+SpiVerticle spi("spi");
 
 
 class DummyVerticle : public VerticleCoRoutine
