@@ -98,15 +98,15 @@ public:
         spi_clear_address(1);
         spi_clear_command(1);
         spi_clear_dummy(1);
-        /*       uint32_t spi_ctrl2=0;
+               uint32_t spi_ctrl2=0;
                spi_ctrl2 = READ_PERI_REG(SPI_CTRL2(1));
                spi_ctrl2 += ( 7 << SPI_MISO_DELAY_NUM_S );
                spi_ctrl2 += (2 << SPI_MISO_DELAY_MODE_S); // add delay for going trough mux , see ESP32 ref manual
-               WRITE_PERI_REG(SPI_CTRL2(1), spi_ctrl2);*/
+               WRITE_PERI_REG(SPI_CTRL2(1), spi_ctrl2);
 
-        uint32_t spi_user=READ_PERI_REG(SPI_USER(1));
+ /*       uint32_t spi_user=READ_PERI_REG(SPI_USER(1));
         spi_user  |= (SPI_USER0_CS_HOLD | SPI_USER0_CS_SETUP);
-        WRITE_PERI_REG(SPI_USER(1), spi_user);
+        WRITE_PERI_REG(SPI_USER(1), spi_user);*/
         return E_OK;
     };
     Erc deInit() {
