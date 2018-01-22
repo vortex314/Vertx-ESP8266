@@ -9,6 +9,7 @@
 #include <Sys.h>
 #include <stdint.h>
 #include <sys/time.h>
+#include <task.h>
 
 uint64_t Sys::_upTime;
 
