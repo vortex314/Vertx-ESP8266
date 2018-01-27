@@ -5,11 +5,12 @@
  *      Author: lieven
  */
 #include <FreeRTOS.h>
+#include <task.h>
 #include <Log.h>
 #include <Sys.h>
 #include <stdint.h>
 #include <sys/time.h>
-#include <task.h>
+
 
 uint64_t Sys::_upTime;
 
@@ -33,8 +34,7 @@ uint64_t Sys::millis()
     return (time.tv_sec * 1000) + (time.tv_usec / 1000);*/
     return Sys::micros() / 1000;
 }
-#include <FreeRTOS.h>
-#include <task.h>
+
 uint64_t Sys::micros()
 {
 
@@ -42,7 +42,7 @@ uint64_t Sys::micros()
     static uint32_t msClock = 0;
 
 
-    taskENTER_CRITICAL(  );
+    vPortEnterCritical();
     uint32_t ccount;
     __asm__ __volatile__("esync; rsr %0,ccount"
                          : "=a"(ccount));
@@ -50,7 +50,7 @@ uint64_t Sys::micros()
         msClock++;
     }
     lsClock = ccount;
-    taskEXIT_CRITICAL(  );
+    portEXIT_CRITICAL();
 
 
     uint64_t micros = msClock;

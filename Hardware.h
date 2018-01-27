@@ -59,7 +59,7 @@ public:
                    DIN_FALL,
                    DIN_CHANGE
                  } PinChange;
-    static DigitalIn &create(PhysicalPin pin);
+    static DigitalIn& create(PhysicalPin pin);
     virtual int read() = 0;
     virtual Erc init() = 0;
     virtual Erc deInit() = 0;
@@ -69,14 +69,12 @@ public:
 //===================================================== GPIO DigitalOut
 class DigitalOut : public Driver
 {
-    PhysicalPin _gpio;
-
 public:
-    static DigitalOut &create(PhysicalPin pin);
-    virtual Erc init();
-    virtual Erc deInit();
-    virtual Erc write(int);
-    virtual PhysicalPin getPin();
+    static DigitalOut& create(PhysicalPin pin);
+    virtual Erc init()=0;
+    virtual Erc deInit()=0;
+    virtual Erc write(int)=0;
+    virtual PhysicalPin getPin()=0;
 };
 //===================================================== I2C ===
 
@@ -150,7 +148,8 @@ class Connector
 private:
     uint32_t toPin(uint32_t logicalPin);
     void lockPin(LogicalPin);
-    bool isUsedPin(LogicalPin lp) {
+    bool isUsedPin(LogicalPin lp)
+    {
         return _pinsUsed & lp;
     }
     void freePin(LogicalPin);

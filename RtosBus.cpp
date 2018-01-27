@@ -20,7 +20,8 @@
 #include <Sntp.h>
 #include <Mdns.h>
 #include <Property.h>
-//#include <Hardware.h> //
+#include <Hardware.h> //
+#include <DWM1000_Anchor.h>
 
 
 
@@ -87,11 +88,12 @@ EventBus eb(1024);
 Log logger(256);
 Telnet telnet("telnet");
 Wifi wifi("wifi");
-LedBlinker ledBlue("LED_BLUE");
-LedBlinker ledRed("LED_RED");
+LedBlinker ledBlue("LED_BLUE",DigitalOut::create(2));
+LedBlinker ledRed("LED_RED",DigitalOut::create(16));
 Monitor monitor("monitor");
 CoRoutineTask coRoutines("CoRout");
-Sntp sntp("sntp");
+//Sntp sntp("sntp");
+DWM1000_Anchor anchor("anchor",Spi::create(12,13,14,15),DigitalIn::create(4),DigitalOut::create(5));
 
 Mqtt mqtt("mqtt");
 Task task("task");
@@ -100,7 +102,7 @@ PropertyVerticle propSender("props");
 
 #include <SpiVerticle.h>
 
-SpiVerticle spi("spi");
+//SpiVerticle spi("spi");
 
 
 class DummyVerticle : public VerticleCoRoutine
@@ -154,11 +156,6 @@ extern "C" void user_init(void)
     INFO(" host : %s",hn.c_str());
     Sys::hostname(hn.c_str());
 
-    ledBlue.setGpio(2);
-    ledBlue.setInterval(100);
-
-    ledRed.setGpio(16);
-    ledRed.setInterval(100);
 
     Verticle* pv;
     for(pv=Verticle::first(); pv; pv=pv->next())

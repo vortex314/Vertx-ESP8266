@@ -1,32 +1,31 @@
 #include "LedBlinker.h"
 
 
-LedBlinker::LedBlinker(const char *name)
-    : VerticleCoRoutine(name)
+LedBlinker::LedBlinker(const char *name,DigitalOut& ledGpio)
+    : VerticleCoRoutine(name),_ledGpio(ledGpio)
 {
-    _gpio = 2;
     _interval=100;
 }
 
 void LedBlinker::run()
 {
     PT_BEGIN();
-    gpio_enable(_gpio, GPIO_OUTPUT);
+    _ledGpio.init();
 
     while (true) {
         PT_WAIT_SIGNAL(_interval);
-        gpio_write(_gpio, 1);
+        _ledGpio.write(1);
 
         PT_WAIT_SIGNAL(_interval);
-        gpio_write(_gpio, 0);
+        _ledGpio.write(0);
 
     }
     PT_END();
 }
 
-void LedBlinker::setGpio(uint32_t gpio)
+void LedBlinker::setup()
 {
-    _gpio=gpio;
+    _ledGpio.init();
 }
 
 void LedBlinker::setInterval(uint32_t interval)

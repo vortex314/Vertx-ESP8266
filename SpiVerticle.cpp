@@ -14,7 +14,7 @@ void SpiVerticle::start()
     eb.on("mqtt/connected",[this](Message& msg) {
 
     });
-    _spi.setClock(Spi::SPI_CLOCK_125K);
+    _spi.setClock(Spi::SPI_CLOCK_4M);
     _spi.setHwSelect(true);
     _spi.setMode(Spi::SPI_MODE_PHASE0_POL0);
     _spi.setLsbFirst(false);
@@ -50,7 +50,7 @@ uint32_t dividers[]= {
 void SpiVerticle::run()
 {
 
-    static uint32_t idx=0;
+    static uint32_t idx=5;
     Bytes out(10);
     Bytes in(10);
 
@@ -61,17 +61,17 @@ void SpiVerticle::run()
     PT_BEGIN();
     while(true) {
 
-        INFO("clock : %d ",idx);
-        spi_set_frequency_div(1,dividers[idx]);
+ /*       INFO("clock : %d ",idx);
+        spi_set_frequency_div(1,dividers[idx]); */
 
-        PT_WAIT(10);
+        PT_WAIT(0);
 
         out.clear();
         out.write(readDevice,0,sizeof(readDevice));
         _spi.exchange(in,out);
         logIn(in);
 
-        out.clear();
+ /*       out.clear();
         out.write(writeEuid,0,sizeof(writeEuid));
         _spi.exchange(in,out);
         logIn(in);
@@ -79,9 +79,8 @@ void SpiVerticle::run()
         out.clear();
         out.write(readEuid,0,sizeof(readEuid));
         _spi.exchange(in,out);
-        logIn(in);
-        idx++;
-        if ( idx > 5) idx=0;
+        logIn(in);*/
+
 
     }
     PT_END();

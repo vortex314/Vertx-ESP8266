@@ -103,14 +103,14 @@ bool Mqtt::do_connect()
     _data.willFlag       = 0;
     _data.MQTTVersion    = 3;
     _data.clientID.cstring   = _mqtt_client_id;
-    _data.username.cstring   = MQTT_USER;
+    _data.username.cstring   = (char*)MQTT_USER;
 //   _data.username.lenstring=0;
-    _data.password.cstring   = MQTT_PASS;
+    _data.password.cstring   = (char*)MQTT_PASS;
 //    _data.password.lenstring=0;
     _data.keepAliveInterval  = 20;
     _data.cleansession   = 0;
     _data.will.topicName.cstring = (char*)_topicAlive.data();
-    _data.will.message.cstring = "false";
+    _data.will.message.cstring = (char*)"false";
     INFO("Send MQTT connect ... ");
     _ret = mqtt_connect(&_client, &_data);
     if(_ret) {

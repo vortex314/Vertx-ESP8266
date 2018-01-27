@@ -2,16 +2,17 @@
 #define LEDBLINKER_H
 
 #include <vertx.h>
+#include <Hardware.h>
 
 class LedBlinker : public VerticleCoRoutine
 {
-    uint32_t _gpio = 2;
+    DigitalOut& _ledGpio;
     uint32_t _interval=100;
 
 public:
-    LedBlinker(const char *name);
+    LedBlinker(const char *name,DigitalOut& ledGpio);
     void run();
-    void setGpio(uint32_t gpio);
+    void setup();
     void setInterval(uint32_t);
 };
 #endif // LEDBLINKER_H

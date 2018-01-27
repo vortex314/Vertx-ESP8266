@@ -4,6 +4,46 @@
 #include "esp/uart.h"
 #include "esp/gpio.h"
 #include "espressif/esp_common.h"
+class DigitalIn_ESP8266 : public DigitalIn
+{
+    PhysicalPin _gpio;
+    void* _object;
+    FunctionPointer _fp;
+
+public:
+    DigitalIn_ESP8266(uint32_t gpio) : _gpio(gpio) {
+    }
+    Erc init() {
+        gpio_enable(_gpio, GPIO_INPUT);
+        return E_OK;
+    }
+
+    Erc deInit() {
+        gpio_enable(_gpio, GPIO_INPUT);
+        return E_OK;
+    }
+
+    int read() {
+        return gpio_read(_gpio);
+    }
+    
+    Erc onChange(DigitalIn::PinChange pinChange, FunctionPointer fp, void *object){
+        _fp=fp;
+        _object=object;
+        return E_OK;
+    }
+    PhysicalPin getPin() {
+        return _gpio;
+    }
+};
+
+DigitalIn &DigitalIn::create(PhysicalPin pin)
+{
+    DigitalIn_ESP8266 *ptr = new DigitalIn_ESP8266(pin);
+    return *ptr;
+}
+
+
 
 
 class DigitalOut_ESP8266 : public DigitalOut
@@ -13,13 +53,15 @@ class DigitalOut_ESP8266 : public DigitalOut
 public:
     DigitalOut_ESP8266(uint32_t gpio) : _gpio(gpio) {
     }
+    ~DigitalOut_ESP8266(){};
     Erc init() {
         gpio_enable(_gpio, GPIO_OUTPUT);
         return E_OK;
     }
 
     Erc deInit() {
-        gpio_enable(_gpio, GPIO_INPUT);
+  //      gpio_enable(_gpio, GPIO_INPUT);
+        gpio_disable(_gpio);
         return E_OK;
     }
 
@@ -31,6 +73,10 @@ public:
         return _gpio;
     }
 };
+
+
+
+DigitalOut_ESP8266 dout(1);
 
 DigitalOut &DigitalOut::create(PhysicalPin pin)
 {

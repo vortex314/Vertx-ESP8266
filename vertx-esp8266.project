@@ -5,6 +5,32 @@
       <![CDATA[00010001N0011Debug_Linux000000000000]]>
     </Plugin>
   </Plugins>
+  <VirtualDirectory Name="DWM1000">
+    <File Name="../DWM1000/spi_register.h"/>
+    <File Name="../DWM1000/DWM1000_Tag.h"/>
+    <File Name="../DWM1000/DWM1000_Tag.cpp"/>
+    <File Name="../DWM1000/DWM1000_Message.h"/>
+    <File Name="../DWM1000/DWM1000_Anchor.h"/>
+    <File Name="../DWM1000/DWM1000_Anchor.cpp"/>
+    <File Name="../DWM1000/DWM1000.h"/>
+    <File Name="../DWM1000/DWM1000.cpp"/>
+    <File Name="../DWM1000/deca_version.h"/>
+    <File Name="../DWM1000/deca_types.h"/>
+    <File Name="../DWM1000/decaSpi.h"/>
+    <File Name="../DWM1000/decaSpi.cpp"/>
+    <File Name="../DWM1000/deca_spi.h"/>
+    <File Name="../DWM1000/deca_spi.c"/>
+    <File Name="../DWM1000/deca_sleep.h"/>
+    <File Name="../DWM1000/deca_sleep.c"/>
+    <File Name="../DWM1000/deca_regs.h"/>
+    <File Name="../DWM1000/deca_range_tables.c"/>
+    <File Name="../DWM1000/deca_param_types.h"/>
+    <File Name="../DWM1000/deca_params_init.c"/>
+    <File Name="../DWM1000/deca_mutex.c"/>
+    <File Name="../DWM1000/deca_device_api.h"/>
+    <File Name="../DWM1000/deca_device.c"/>
+    <File Name="../DWM1000/component.mk"/>
+  </VirtualDirectory>
   <Reconciliation>
     <Regexes/>
     <Excludepaths/>
@@ -17,6 +43,9 @@
   <Description/>
   <Dependencies/>
   <VirtualDirectory Name="src">
+    <File Name="local.mk"/>
+    <File Name="Config.cpp"/>
+    <File Name="Config.h"/>
     <File Name="Hardware.h"/>
     <File Name="Hardware_ESP8266.cpp"/>
     <File Name="Mqtt.cpp"/>

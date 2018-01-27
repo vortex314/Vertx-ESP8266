@@ -25,14 +25,16 @@ class Verticle;
 class Verticle : public LinkedList<Verticle>
 {
 public:
-    virtual const char *name() {
+    virtual const char *name()
+    {
         return "ERRORE!";
     };
-    virtual void start() { };
-    virtual void stop() {};
-    virtual void run();
+    virtual void start() =0;
+    virtual void stop() =0;
+    virtual void run()=0;
 //    virtual void onMessage(Cbor &msg) {};
-    virtual bool isTask() {
+    virtual bool isTask()
+    {
         return false;
     };
 
@@ -64,7 +66,8 @@ public:
 //    void signalSys(uint32_t n);
     bool hasSignal(uint32_t n);
     uint32_t waitSignal(uint32_t time);
-    bool isTask() {
+    bool isTask()
+    {
         return true;
     };
 
@@ -105,13 +108,16 @@ public:
     bool hasSignal(uint32_t s);
 //    void onMessage(Cbor &msg);
     bool isTask();
-    inline void timeout(uint32_t t) {
+    inline void timeout(uint32_t t)
+    {
         __timeout = Sys::millis()+t;
     }
-    inline uint64_t timeout() {
+    inline uint64_t timeout()
+    {
         return __timeout;
     }
-    inline uint32_t signal() {
+    inline uint32_t signal()
+    {
         return _signal;
     }
 };
@@ -157,16 +163,20 @@ class Message :  public Cbor
 {
 
 public:
-    Message(uint32_t size):Cbor(size) {
+    Message(uint32_t size):Cbor(size)
+    {
     }
-    template <typename T> bool get(uid_t uid,T& var) {
+    template <typename T> bool get(uid_t uid,T& var)
+    {
         return getKeyValue(uid,var);
     };
-    template <typename T> Message& put(uid_t uid,T& var) {
+    template <typename T> Message& put(uid_t uid,T& var)
+    {
         addKeyValue(uid,var);
         return *this;
     }
-    void clear() {
+    void clear()
+    {
         Cbor::clear();
     }
 };
@@ -185,9 +195,9 @@ public:
     Erc publish(EventLabel);
     Erc publish(uid_t);
     Erc publish(EventLabel, Message &);
-    Erc publish(uid_t ,Message& );
+    Erc publish(uid_t,Message& );
     Erc send(EventLabel, Message &);
-    Erc consumer(EventLabel , EventHandler );
+    Erc consumer(EventLabel, EventHandler );
     Erc localConsumer(EventLabel, EventHandler );
     Erc addInterceptor(EventHandler );
     Erc removeInterceptor(EventHandler );
