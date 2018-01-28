@@ -279,9 +279,9 @@ void Config::load()
 
     status = sysparam_get_info(&base_addr, &num_sectors);
     if (status == SYSPARAM_OK) {
-        INFO("[current sysparam region is at 0x%08x (%d sectors)]\n", base_addr, num_sectors);
+        INFO("[current sysparam region is at 0x%08x (%d sectors)]", base_addr, num_sectors);
     } else {
-         num_sectors = DEFAULT_SYSPARAM_SECTORS;
+        num_sectors = DEFAULT_SYSPARAM_SECTORS;
         base_addr = sdk_flashchip.chip_size - (5 + num_sectors) * sdk_flashchip.sector_size;
     }
     uint8_t* destPtr;
@@ -293,6 +293,7 @@ void Config::load()
         free(destPtr);
     } else {
         ERROR("sysparam_get_data('config',...) fails : %d ",status);
+        sysparam_set_data("config",(uint8_t*)"{}",3,false);
         return;
     }
 // load string from flash
@@ -301,9 +302,16 @@ void Config::load()
 
     _loaded = true;
     _root = &_jsonBuffer.parseObject(_charBuffer);
-    if (!_root->success()) {
+    if (_root->success()) {
+
+    } else {
+        ERROR(" couldn't parse config '%s' , dropped old config ! ",_charBuffer);
+        strcpy(_charBuffer,"{}");
         _root = &_jsonBuffer.parseObject("{}");
     }
+    char buffer[1024];
+    _root->printTo(buffer, sizeof(buffer));
+    INFO(" config loaded : %s",buffer);
 }
 
 void Config::save()

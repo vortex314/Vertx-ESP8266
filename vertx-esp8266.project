@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="vertx-esp8266" Version="10.0.0" InternalType="Console">
+  <VirtualDirectory Name="etl"/>
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00010001N0011Debug_Linux000000000000]]>

@@ -4,5 +4,5 @@
 // #define WIFI_PASS "my secret password"
 //
 
-#define WIFI_SSID "Merckx3"
-#define WIFI_PASS "LievenMarletteEwoutRonald"
+#define WIFI_SSID SSID
+#define WIFI_PASS PSWD

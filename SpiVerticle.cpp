@@ -19,6 +19,7 @@ void SpiVerticle::start()
     _spi.setMode(Spi::SPI_MODE_PHASE0_POL0);
     _spi.setLsbFirst(false);
     _spi.init();
+    
     VerticleCoRoutine::start();
 }
 
@@ -64,14 +65,14 @@ void SpiVerticle::run()
  /*       INFO("clock : %d ",idx);
         spi_set_frequency_div(1,dividers[idx]); */
 
-        PT_WAIT(0);
+        PT_YIELD();
 
         out.clear();
         out.write(readDevice,0,sizeof(readDevice));
         _spi.exchange(in,out);
-        logIn(in);
+       logIn(in);
 
- /*       out.clear();
+         out.clear();
         out.write(writeEuid,0,sizeof(writeEuid));
         _spi.exchange(in,out);
         logIn(in);
@@ -79,7 +80,7 @@ void SpiVerticle::run()
         out.clear();
         out.write(readEuid,0,sizeof(readEuid));
         _spi.exchange(in,out);
-        logIn(in);*/
+        logIn(in);
 
 
     }
