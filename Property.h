@@ -17,6 +17,9 @@ public:
         add(this);
     }
     virtual void toJson(Str&) {};
+    void updated(){
+        _timeout=Sys::millis()-1;
+    }
 
 };
 

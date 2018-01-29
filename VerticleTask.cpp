@@ -64,7 +64,7 @@ uint32_t VerticleTask::newEvent()
 
 void VerticleTask::signal(uint32_t n)
 {
-    INFO(" signal %d to %s",n,name());
+    DEBUG(" signal %d to %s",n,name());
     if ( _taskHandle )
         xTaskNotify(_taskHandle, 1<<n, eSetBits);
 }

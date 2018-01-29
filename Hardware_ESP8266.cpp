@@ -174,6 +174,8 @@ public:
         else if ( _clock == SPI_CLOCK_2M ) settings.freq_divider = SPI_FREQ_DIV_2M;
         else if ( _clock == SPI_CLOCK_4M ) settings.freq_divider = SPI_FREQ_DIV_4M;
         else if ( _clock == SPI_CLOCK_10M ) settings.freq_divider = SPI_FREQ_DIV_10M;
+        else if ( _clock == SPI_CLOCK_8M ) settings.freq_divider = SPI_FREQ_DIV_8M;
+        else if ( _clock == SPI_CLOCK_20M ) settings.freq_divider = SPI_FREQ_DIV_20M;
         else settings.freq_divider = SPI_FREQ_DIV_1M;
         settings.endianness=SPI_LITTLE_ENDIAN;
         settings.minimal_pins=_hwSelect ? false:true;

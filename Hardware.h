@@ -110,7 +110,9 @@ public:
         SPI_CLOCK_1M=1000000,
         SPI_CLOCK_2M=2000000,
         SPI_CLOCK_4M=4000000,
-        SPI_CLOCK_10M=10000000
+        SPI_CLOCK_8M=8000000,
+        SPI_CLOCK_10M=10000000,
+        SPI_CLOCK_20M=20000000
     } SpiClock;
 
     static Spi &create(PhysicalPin miso, PhysicalPin mosi, PhysicalPin sck,
