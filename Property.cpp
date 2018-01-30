@@ -48,15 +48,14 @@ void PropertyVerticle::run()
         INFO("0");
         while(!_mqttConnected) {
             PT_WAIT(1000);
-//            INFO("1");
         }
 
         while(_mqttConnected ) {
-//           INFO("2");
             _currentProp=Property::first();
             while (_currentProp ) {
                 if ( _currentProp->_timeout < Sys::millis()) {
                     sendProp(_currentProp);
+ //                   _currentProp=Property::first();
                     PT_WAIT(10);
                 }
                 _currentProp=_currentProp->next();

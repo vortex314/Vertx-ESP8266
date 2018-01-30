@@ -7,7 +7,7 @@ enum {
     WIFI_CONNECTED
 };
 
-Mdns::Mdns(const char* name)  : VerticleTask("sntp",512,6)
+Mdns::Mdns(const char* name)  : VerticleCoRoutine(name)
 {
 }
 

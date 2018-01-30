@@ -103,7 +103,7 @@ CoRoutineTask coRoutines("CoRout");
 
 
 Mqtt mqtt("mqtt");
-Task task("task");
+//Task task("task");
 Mdns mdns("mdns");
 PropertyVerticle propSender("props");
 
