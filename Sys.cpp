@@ -35,7 +35,7 @@ uint64_t Sys::millis()
     return Sys::micros() / 1000;
 }
 
-uint64_t Sys::micros()
+IRAM uint64_t Sys::micros()
 {
 
     static uint32_t lsClock = 0;

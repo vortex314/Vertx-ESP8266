@@ -63,6 +63,7 @@ public:
     uint32_t newEvent();
 
     void signal(uint32_t  n);
+    void signalFromIsr(uint32_t n);
 //    void signalSys(uint32_t n);
     bool hasSignal(uint32_t n);
     uint32_t waitSignal(uint32_t time);

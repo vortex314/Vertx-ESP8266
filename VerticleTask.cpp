@@ -64,10 +64,19 @@ uint32_t VerticleTask::newEvent()
 
 void VerticleTask::signal(uint32_t n)
 {
-    DEBUG(" signal %d to %s",n,name());
     if ( _taskHandle )
         xTaskNotify(_taskHandle, 1<<n, eSetBits);
 }
+
+IRAM void VerticleTask::signalFromIsr(uint32_t n)
+{
+    BaseType_t xHigherPriorityTaskWoken;
+    if ( _taskHandle ) {
+        xTaskNotifyFromISR(_taskHandle, 1<<n, eSetBits,&xHigherPriorityTaskWoken);
+        portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
+    }
+}
+
 
 uint32_t VerticleTask::waitSignal(uint32_t time)
 {
