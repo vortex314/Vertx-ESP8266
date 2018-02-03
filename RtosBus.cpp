@@ -50,6 +50,7 @@ extern "C" void __cxa_pure_virtual()
 
 class CoRoutineTask : public VerticleTask
 {
+
 public:
     CoRoutineTask(const char *name)
         : VerticleTask(name, 500, 1)
@@ -58,9 +59,16 @@ public:
     void run()
     {
         while (true) {
-//            vCoRoutineSchedule();
-            eb.eventLoop();
-            VerticleCoRoutine::loop();
+            eb.eventLoop(); // handle incoming messages first
+            for(Verticle* pv = Verticle::first(); pv; pv=pv->next()) {
+                if ( !pv->isTask()) {
+                    VerticleCoRoutine* pvcr = (VerticleCoRoutine*)pv;
+                    if ( Sys::millis() >  pvcr->timeout() ) pvcr->signal(SIGNAL_TIMER); // set timeout if needed
+                    if ( pvcr->signal() ) {
+                        pvcr->run();
+                    }
+                }
+            }
         }
     }
 };

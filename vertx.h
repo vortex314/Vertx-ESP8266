@@ -32,7 +32,7 @@ public:
     virtual void start() =0;
     virtual void stop() =0;
     virtual void run()=0;
-//    virtual void onMessage(Cbor &msg) {};
+    virtual void signal(uint32_t n)=0;
     virtual bool isTask()
     {
         return false;
@@ -58,13 +58,12 @@ public:
     const char *name();
     virtual void run();
     virtual void start();
-//   virtual void onMessage(Cbor &msg);
     void stop();
     uint32_t newEvent();
 
     void signal(uint32_t  n);
     void signalFromIsr(uint32_t n);
-//    void signalSys(uint32_t n);
+
     bool hasSignal(uint32_t n);
     uint32_t waitSignal(uint32_t time);
     bool isTask()
@@ -85,8 +84,6 @@ typedef void (*StaticHandler)(Cbor &);
 class VerticleCoRoutine : public Verticle
 {
     char *_name;
-//    CoRoutineHandle_t _xHandle;
-
 
 protected:
     unsigned short _ptLine=0;
@@ -95,19 +92,13 @@ protected:
 
 public:
     VerticleCoRoutine(const char *name) ;
-    /*   CoRoutineHandle_t getHandle();
-       inline CoRoutineHandle_t handle() {
-           return _xHandle;
-       };*/
     const char* name();
     virtual void run();
-//    static void handler(CoRoutineHandle_t xHandle, UBaseType_t uxIndex);
-    static void loop();
+//    static void loop();
     void start();
     void stop();
     void signal(uint32_t s);
     bool hasSignal(uint32_t s);
-//    void onMessage(Cbor &msg);
     bool isTask();
     inline void timeout(uint32_t t)
     {

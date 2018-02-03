@@ -75,7 +75,6 @@ void EventBus::eventLoop()
             if ( uidDst == consumer->_eventUid) {
                 consumer->_handler(_rxd);
             }
-
         }
     }
 }

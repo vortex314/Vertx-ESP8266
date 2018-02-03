@@ -20,14 +20,14 @@ VerticleTask::VerticleTask(const char *name, uint16_t stack, uint8_t priority)
 void VerticleTask::run()
 {
     while (true) {
-        INFO(" default  run()   : %s : %X ", _name, this);
-        waitSignal(1000);
+        DEBUG(" default  run()   : %s : %X ", _name, this);
+        waitSignal(1000000);
     }
 }
 
 void VerticleTask::handler(void *p)
 {
-    INFO(" running %X ",p);
+    DEBUG(" running %X ",p);
     VerticleTask *pV = (VerticleTask *)p;
     pV->run();
 }

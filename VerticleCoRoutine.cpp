@@ -18,7 +18,7 @@ void VerticleCoRoutine::run()
 {
     PT_BEGIN();
     for (;;) {
-        PT_WAIT_SIGNAL(10000);
+        PT_WAIT_SIGNAL(3600000);
         if ( hasSignal(SIGNAL_TIMER)) {
             INFO(" coroutine-%s running default.", name());
         } else {
@@ -46,7 +46,7 @@ void VerticleCoRoutine::start()
 void VerticleCoRoutine::stop()
 {
 }
-void VerticleCoRoutine::loop()
+/*void VerticleCoRoutine::loop()
 {
     Verticle *pv;
     for( pv = Verticle::first(); pv; pv=pv->next()) {
@@ -60,7 +60,7 @@ void VerticleCoRoutine::loop()
             }
         }
     }
-}
+}*/
 
 void VerticleCoRoutine::signal(uint32_t sign)
 {
