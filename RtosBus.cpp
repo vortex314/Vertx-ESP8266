@@ -53,7 +53,7 @@ class CoRoutineTask : public VerticleTask
 
 public:
     CoRoutineTask(const char *name)
-        : VerticleTask(name, 500, 1)
+        : VerticleTask(name, 600, 1)
     {
     }
     void run()
@@ -192,7 +192,7 @@ extern "C" void user_init(void)
     sdk_wifi_get_macaddr(STATION_IF, un.mac);
     int role;
     config.get("dwm1000/roleNbr",role,1);
-    role=2;
+    role=1;
     if ( role==1 ) {
         DWM1000_Tag* tag=new DWM1000_Tag("tag",Spi::create(12,13,14,15),DigitalIn::create(4),DigitalOut::create(5));
         tag->setShortAddress(un.lw[2]);
