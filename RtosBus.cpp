@@ -53,11 +53,9 @@ class CoRoutineTask : public VerticleTask
 
 public:
     CoRoutineTask(const char *name)
-        : VerticleTask(name, 600, 1)
-    {
+        : VerticleTask(name, 600, 1) {
     }
-    void run()
-    {
+    void run() {
         while (true) {
             eb.eventLoop(); // handle incoming messages first
             for(Verticle* pv = Verticle::first(); pv; pv=pv->next()) {
@@ -82,15 +80,12 @@ class Task : public VerticleTask
 {
 public:
     Task(const char *name)
-        : VerticleTask(name, 256, 3)
-    {
+        : VerticleTask(name, 256, 3) {
     }
-    void start()
-    {
+    void start() {
         VerticleTask::start();
     }
-    void run()
-    {
+    void run() {
         while (true) {
             waitSignal(1000);
             //            EventBus::eventLoop();
@@ -124,12 +119,10 @@ class DummyVerticle : public VerticleCoRoutine
 {
     uint32_t _interval;
 public:
-    DummyVerticle(const char* name):VerticleCoRoutine(name)
-    {
+    DummyVerticle(const char* name):VerticleCoRoutine(name) {
 
     }
-    void start()
-    {
+    void start() {
         eb.on("wifi/disconnected",[this](Message& evt) {
             _interval=100;
             INFO(" interval : %d",_interval);
@@ -140,8 +133,7 @@ public:
         });
         VerticleCoRoutine::start();
     }
-    void run()
-    {
+    void run() {
         PT_BEGIN();
         for (;;) {
             PT_WAIT_SIGNAL(10000);
@@ -190,14 +182,15 @@ extern "C" void user_init(void)
         uint16_t lw[4];
     } un;
     sdk_wifi_get_macaddr(STATION_IF, un.mac);
-    int role;
-    config.get("dwm1000/roleNbr",role,1);
-    role=1;
-    if ( role==1 ) {
+    Str role(2);
+    config.setNameSpace("dwm1000");
+    config.get("role",role,"A");
+
+    if ( role.peek(0)=='T' ) {
         DWM1000_Tag* tag=new DWM1000_Tag("tag",Spi::create(12,13,14,15),DigitalIn::create(4),DigitalOut::create(5));
         tag->setShortAddress(un.lw[2]);
         tag->setLongAddress(un.mac);
-    } else {
+    } else if ( role.peek(0)=='A'  ) {
         DWM1000_Anchor* anchor=new DWM1000_Anchor("anchor",Spi::create(12,13,14,15),DigitalIn::create(4),DigitalOut::create(5));
         anchor->setShortAddress(un.lw[2]);
         anchor->setLongAddress(un.mac);

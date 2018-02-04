@@ -38,7 +38,7 @@ void Monitor::run()
 {
     PT_BEGIN();
     while (true) {
-        PT_WAIT_SIGNAL(5000);
+        PT_WAIT_SIGNAL(30000);
         _lowestStack = 100000;
 
         INFO(" freeRTOS heap : %d  heap SDK : %d ", xPortGetFreeHeapSize(), sdk_system_get_free_heap_size());

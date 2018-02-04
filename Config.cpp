@@ -167,12 +167,12 @@ void Config::get(const char* key, double& value, double defaultValue)
 
 void Config::print(Str& str)
 {
-    load();
+    _root->printTo((char*)str.data(), str.capacity());
 }
 
 void Config::printPretty(Str& str)
 {
-    load();
+    _root->prettyPrintTo((char*)str.data(), str.capacity());
 }
 
 #ifdef ESP_IDF
@@ -185,8 +185,8 @@ void Config::printPretty(Str& str)
 void Config::load()
 {
     if (_loaded) {
-        char _buffer[1024];
-        _root->prettyPrintTo(_buffer, sizeof(_buffer));
+//        char _buffer[1024];
+//       _root->printPretty(_buffer, sizeof(_buffer));
         //    DEBUG(" config object : %s", _buffer);
         return;
     }
@@ -234,7 +234,7 @@ void Config::load()
 void Config::save()
 {
     esp_err_t err;
-    char buffer[1024];
+    char buffer[512];
     _root->printTo(buffer, sizeof(buffer));
     nvs_handle my_handle;
     err = nvs_open("storage", NVS_READWRITE, &my_handle);
@@ -301,7 +301,7 @@ void Config::load()
     // load JsonObject from String
 
     _loaded = true;
-    _root = &_jsonBuffer.parseObject(_charBuffer);
+    _root = &_jsonBuffer.parseObject((const char*)_charBuffer);
     if (_root->success()) {
 
     } else {
@@ -309,18 +309,17 @@ void Config::load()
         strcpy(_charBuffer,"{}");
         _root = &_jsonBuffer.parseObject("{}");
     }
-    char buffer[1024];
-    _root->printTo(buffer, sizeof(buffer));
-    INFO(" config loaded : %s",buffer);
+//    char buffer[1024];
+    _root->printTo(_charBuffer, sizeof(_charBuffer));
+    INFO(" config loaded : %s",_charBuffer);
 }
 
 void Config::save()
 {
-    char buffer[1024];
-    _root->printTo(buffer, sizeof(buffer));
-    sysparam_status_t status = sysparam_set_string("config", buffer);
+    _root->printTo(_charBuffer, sizeof(_charBuffer));
+    sysparam_status_t status = sysparam_set_string("config", _charBuffer);
     if ( status == SYSPARAM_OK) {
-        INFO(" config saved : %s ", buffer);
+        INFO(" config saved : %s ", _charBuffer);
     } else {
         ERROR("config save failed : %d ",status)
     }
