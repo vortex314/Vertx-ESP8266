@@ -12,10 +12,13 @@
 class Wifi : public VerticleTask
 {
     uint8_t status = 0;
-    struct sdk_station_config config;
+    struct sdk_station_config _config;
+    Str  _ssid;
+    Str _pswd;
 
-  public:
+public:
     Wifi(const char *name);
+    void start();
     void run();
 };
 #endif

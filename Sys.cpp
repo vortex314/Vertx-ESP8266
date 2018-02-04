@@ -10,9 +10,28 @@
 #include <Sys.h>
 #include <stdint.h>
 #include <sys/time.h>
-
+#include <espressif/esp_wifi.h>
 
 uint64_t Sys::_upTime;
+
+uint32_t Sys::getSerialId()
+{
+    union {
+        uint8_t my_id[6];
+        uint32_t lsb;
+    } ;
+    sdk_wifi_get_macaddr(STATION_IF, my_id);
+    return lsb;
+}
+
+const char* Sys::getProcessor()
+{
+    return "ESP8266";
+}
+const char* Sys::getBuild()
+{
+    return __DATE__ " " __TIME__;
+}
 
 void Sys::init()
 {

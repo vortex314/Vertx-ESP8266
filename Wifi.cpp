@@ -1,10 +1,19 @@
 
 #include <vertx.h>
 #include <Wifi.h>
+#include <Config.h>
 
-Wifi::Wifi(const char *name) : VerticleTask(name,320,6) {};
+Wifi::Wifi(const char *name) : VerticleTask(name,320,6) ,_ssid(30),_pswd(40) {};
 #include <lwip/api.h>
 #include <lwip/netif.h>
+
+void Wifi::start()
+{
+    config.setNameSpace("wifi");
+    config.get("ssid",_ssid,WIFI_SSID);
+    config.get("pswd",_pswd,WIFI_PASS);
+    VerticleTask::start();
+}
 void Wifi::run()
 {
 
@@ -13,9 +22,9 @@ void Wifi::run()
         uint8_t status = 0;
         // https://github.com/SuperHouse/esp-open-rtos/issues/333
 
-        ZERO(config);
-        strcpy((char *)config.ssid, WIFI_SSID);
-        strcpy((char *)config.password, WIFI_PASS);
+        ZERO(_config);
+        strcpy((char *)_config.ssid, _ssid.c_str());
+        strcpy((char *)_config.password, _pswd.c_str());
         INFO("WiFi: connecting to WiFi");
 //        waitSignal(1000);
 DISCONNECTED : {
@@ -25,8 +34,8 @@ DISCONNECTED : {
                 retries=30;
                 sdk_wifi_station_disconnect();
                 netif_set_hostname(netif_default, Sys::hostname());
-                sdk_wifi_set_opmode(STATION_MODE);
-                sdk_wifi_station_set_config(&config);
+                sdk_wifi_set_opmode(STATIONAP_MODE);
+                sdk_wifi_station_set_config(&_config);
                 sdk_wifi_station_connect();
                 while (true) {
                     status = sdk_wifi_station_get_connect_status();

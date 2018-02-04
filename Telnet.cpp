@@ -131,7 +131,7 @@ void Telnet::command(Str& line)
         if ( strcmp(arg[0],"config")==0) {
             if ( strcmp(arg[1],"show")==0) {
                 config.load();
-                config.print(_outputBuffer);
+                config.printPretty(_outputBuffer);
             } else if ( strcmp(arg[1],"set")==0 && count == 5) {
                 config.setNameSpace(arg[2]);
                 config.set(arg[3],arg[4]);
@@ -143,12 +143,28 @@ void Telnet::command(Str& line)
             } else if ( strcmp(arg[1],"save")==0 ) {
                 config.save();
                 _outputBuffer=" config saved.";
+            } else {
+                _outputBuffer="unknown command";
             }
+        } else if ( strcmp(arg[0],"system")==0) {
+            if ( strcmp(arg[1],"reset")==0) {
+                sdk_system_restart();
+            } else  if ( strcmp(arg[1],"show")==0) {
+                _outputBuffer.format(" CPU : %s \n",Sys::getProcessor());
+                _outputBuffer.format(" heap:%d \n",Sys::getFreeHeap());
+                _outputBuffer.format(" serial : %X \n",Sys::getSerialId());
+                _outputBuffer.format(" sdk : %s \n",sdk_system_get_sdk_version());
+                _outputBuffer.format(" build : %s \n",Sys::getBuild());
+            } else {
+                _outputBuffer="unknown command";
+            }
+        } else {
+            _outputBuffer="unknown service";
         }
-        write(_outputBuffer);
     } else {
-        write(" unknown command.");
+        _outputBuffer=" not enough arguments.";
     }
+    write(_outputBuffer);
 }
 
 void Telnet::write(uint8_t* data,uint32_t len )

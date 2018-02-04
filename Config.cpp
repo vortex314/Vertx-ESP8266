@@ -167,12 +167,14 @@ void Config::get(const char* key, double& value, double defaultValue)
 
 void Config::print(Str& str)
 {
-    _root->printTo((char*)str.data(), str.capacity());
+    _root->printTo(_charBuffer, sizeof(_charBuffer));
+    str=_charBuffer;
 }
 
 void Config::printPretty(Str& str)
 {
-    _root->prettyPrintTo((char*)str.data(), str.capacity());
+    _root->prettyPrintTo(_charBuffer, sizeof(_charBuffer));
+    str=_charBuffer;
 }
 
 #ifdef ESP_IDF
