@@ -3,7 +3,7 @@
 #include <Wifi.h>
 #include <Config.h>
 
-Wifi::Wifi(const char *name) : VerticleTask(name,320,6) ,_ssid(30),_pswd(40) {};
+Wifi::Wifi(const char *name) : VerticleTask(name,500,6),_ssid(30),_pswd(40) {};
 #include <lwip/api.h>
 #include <lwip/netif.h>
 
@@ -14,6 +14,31 @@ void Wifi::start()
     config.get("pswd",_pswd,WIFI_PASS);
     VerticleTask::start();
 }
+
+void startAP()
+{
+    struct sdk_softap_config apconfig;
+
+    if(sdk_wifi_softap_get_config(&apconfig)) {
+
+        strncpy((char *)apconfig.ssid, Sys::hostname(), 32);
+        strncpy((char *)apconfig.password, "password", 32);
+
+        apconfig.authmode = AUTH_WPA2_PSK;
+        apconfig.ssid_hidden = 0;
+        apconfig.max_connection = 4;
+        apconfig.channel=7;
+
+        if(!sdk_wifi_softap_set_config(&apconfig)) {
+            printf("ESP8266 not set ap config!\r\n");
+        }
+    }
+    struct ip_info info;
+    IP4_ADDR(&info.ip, 192, 168, 22, 1);
+//IP4_ADDR(&info.gw, 192, 168, 22, 1);
+    IP4_ADDR(&info.netmask, 255, 255, 255, 0);
+}
+
 void Wifi::run()
 {
 
@@ -34,9 +59,11 @@ DISCONNECTED : {
                 retries=30;
                 sdk_wifi_station_disconnect();
                 netif_set_hostname(netif_default, Sys::hostname());
-                sdk_wifi_set_opmode(STATIONAP_MODE);
+                sdk_wifi_set_opmode(STATION_MODE);
                 sdk_wifi_station_set_config(&_config);
                 sdk_wifi_station_connect();
+
+ //               startAP();
                 while (true) {
                     status = sdk_wifi_station_get_connect_status();
                     if ( status == STATION_GOT_IP ) goto CONNECTED;
