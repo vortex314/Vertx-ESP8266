@@ -1,8 +1,8 @@
 PROGRAM=vertx-esp8266
-EXTRA_COMPONENTS = extras/sntp extras/mdnsresponder ../Common  ../ArduinoJson ../DWM1000 extras/paho_mqtt_c 
+EXTRA_COMPONENTS = extras/sntp extras/mdnsresponder extras/rboot-ota ../Common  ../ArduinoJson ../DWM1000 extras/paho_mqtt_c
 # EXTRA_COMPONENTS = extras/paho_mqtt_c ../Common ../Ebos ../ArduinoJson
 PROGRAM_SRC_DIR=. 
-PROGRAM_INC_DIR=. ../esp-open-rtos/include ../Common  ../ArduinoJson ../DWM1000 ../etl/src
+PROGRAM_INC_DIR=. ../esp-open-rtos/include ../Common  ../ArduinoJson ../DWM1000 ../etl/src  $(ROOT)bootloader $(ROOT)bootloader/rboot
 PROGRAM_CXXFLAGS += -fno-threadsafe-statics -std=c++11 -fno-rtti -lstdc++ -fno-exceptions -DPSWD=${PSWD} -DSSID=${SSID}
 # PROGRAM_INC_DIR=. ../esp-open-rtos/include ../Common ../Ebos ../ArduinoJson ../esp-open-rtos/lwip/lwip/src/include 
 ESPBAUD=921600

@@ -24,6 +24,7 @@
 #include <DWM1000_Anchor.h>
 #include <DWM1000_Tag.h>
 #include <Config.h>
+#include <Tftp.h>
 
 
 
@@ -109,6 +110,7 @@ Mqtt mqtt("mqtt");
 //Task task("task");
 Mdns mdns("mdns");
 PropertyVerticle propSender("props");
+Tftp tftp("tftp");
 
 #include <SpiVerticle.h>
 

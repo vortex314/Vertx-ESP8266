@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CodeLite_Project Name="vertx-esp8266" Version="10.0.0" InternalType="Console">
-  <VirtualDirectory Name="etl"/>
   <Plugins>
     <Plugin Name="qmake">
       <![CDATA[00010001N0011Debug_Linux000000000000]]>
     </Plugin>
   </Plugins>
+  <VirtualDirectory Name="etl"/>
   <VirtualDirectory Name="DWM1000">
     <File Name="../DWM1000/spi_register.h"/>
     <File Name="../DWM1000/DWM1000_Tag.h"/>
@@ -78,6 +78,11 @@
     <File Name="esp_log.h"/>
     <File Name="SpiVerticle.cpp"/>
     <File Name="SpiVerticle.h"/>
+    <File Name="Tftp.h"/>
+    <File Name="Tftp.cpp"/>
+    <File Name="rboot-api.h"/>
+    <File Name="rboot-api.c"/>
+    <File Name="rboot-integration.h"/>
   </VirtualDirectory>
   <VirtualDirectory Name="resources">
     <File Name="CMakeLists.txt"/>
