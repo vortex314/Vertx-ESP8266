@@ -227,7 +227,7 @@ void Config::load()
         nvs_close(my_handle);
     }
     _loaded = true;
-    _root = &_jsonBuffer.parseObject(_charBuffer);
+    _root = &_jsonBuffer.parseObject((const char*)_charBuffer);
     if (!_root->success()) {
         _root = &_jsonBuffer.parseObject("{}");
     }
@@ -262,7 +262,7 @@ void Config::save()
 //==========================================================================
 //
 
-//#ifdef ESP_OPEN_RTOS
+#ifdef ESP_OPEN_RTOS
 extern "C" {
 #include <sysparam.h>
 #include <espressif/spi_flash.h>
@@ -326,6 +326,6 @@ void Config::save()
         ERROR("config save failed : %d ",status)
     }
 }
-//#endif
+#endif
 
 Config config;

@@ -14,7 +14,7 @@ void SpiVerticle::start()
     eb.on("mqtt/connected",[this](Message& msg) {
 
     });
-    _spi.setClock(Spi::SPI_CLOCK_4M);
+    _spi.setClock(Spi::SPI_CLOCK_125K);
     _spi.setHwSelect(true);
     _spi.setMode(Spi::SPI_MODE_PHASE0_POL0);
     _spi.setLsbFirst(false);
@@ -70,7 +70,7 @@ void SpiVerticle::run()
         out.clear();
         out.write(readDevice,0,sizeof(readDevice));
         _spi.exchange(in,out);
-       logIn(in);
+     /*  logIn(in);
 
          out.clear();
         out.write(writeEuid,0,sizeof(writeEuid));
@@ -80,7 +80,7 @@ void SpiVerticle::run()
         out.clear();
         out.write(readEuid,0,sizeof(readEuid));
         _spi.exchange(in,out);
-        logIn(in);
+        logIn(in);*/
 
 
     }

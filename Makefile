@@ -3,7 +3,7 @@ EXTRA_COMPONENTS = extras/sntp extras/mdnsresponder extras/rboot-ota ../Common  
 # EXTRA_COMPONENTS = extras/paho_mqtt_c ../Common ../Ebos ../ArduinoJson
 PROGRAM_SRC_DIR=. 
 PROGRAM_INC_DIR=. ../esp-open-rtos/include ../Common  ../ArduinoJson ../DWM1000 ../etl/src  $(ROOT)bootloader $(ROOT)bootloader/rboot
-PROGRAM_CXXFLAGS += -fno-threadsafe-statics -std=c++11 -fno-rtti -lstdc++ -fno-exceptions -DPSWD=${PSWD} -DSSID=${SSID}
+PROGRAM_CXXFLAGS += -fno-threadsafe-statics -std=c++11 -fno-rtti -lstdc++ -fno-exceptions -DPSWD=${PSWD} -DSSID=${SSID} -DESP_OPEN_RTOS
 # PROGRAM_INC_DIR=. ../esp-open-rtos/include ../Common ../Ebos ../ArduinoJson ../esp-open-rtos/lwip/lwip/src/include 
 ESPBAUD=921600
 TTY ?= USB0

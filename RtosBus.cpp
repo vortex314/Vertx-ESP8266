@@ -187,7 +187,6 @@ extern "C" void user_init(void)
     Str role(2);
     config.setNameSpace("dwm1000");
     config.get("role",role,"N");
-
     if ( role.peek(0)=='T' ) {
         DWM1000_Tag* tag=new DWM1000_Tag("tag",Spi::create(12,13,14,15),DigitalIn::create(4),DigitalOut::create(5));
         tag->setShortAddress(un.lw[2]);
