@@ -1,4 +1,4 @@
-# vertx-esp32
+# vertx-esp8266
 
 The purpose is to have a framework for small embedded devices that have the ease of integration and development.
 
@@ -22,6 +22,7 @@ This framework is based on the ideas that also live  in Vertx and Node.js.
 --  Hardware : abstraction interface for peripherals
 -- DWM1000_Anchor
 -- DWM1000_Tag
+
 
 
 
