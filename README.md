@@ -85,6 +85,8 @@ The property dwm1000.role is used to determine it's role as anchor or tag.
 	anchor3 $ <ctrl-D><enter> closes the connection
 	Connection closed by foreign host.
 ```
+## Sequence diagram of LPS trilateration
+The basics : https://en.wikipedia.org/wiki/Trilateration
 ```mermaid
 sequenceDiagram
 participant Tag
