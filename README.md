@@ -91,17 +91,21 @@ participant Tag
 participant Anchor1
 participant Anchor2
 Anchor1 ->> Tag: Blink Message 
-Note right of Tag: Anchor1 announces himself to Tag. Tag extracts x,y(Configured static in Anchor ) ,distance ( last measurement )  from blink Message. Tag will include Anchor1 in polling.
+Note right of Tag: Anchor1 announces himself to Tag. Tag extracts x,y(Configured static in Anchor ) ,distance ( last measurement )  from blink Message. Tag will include Anchor1 in polling. !! NON-STANDARD blink message
 
 Tag ->> Anchor1: Poll message
 activate Tag
 Activate Anchor1
 Anchor1 ->> Tag: Resp Message ( rx time + fixed delay )
-Tag ->> Anchor1: Final message ( 
+Tag ->> Anchor1: Final message ( poll,resp,final timing included )
+Note right of Anchor1 : Anchor1 stores distance for next blink message
 deactivate Tag
 deactivate Anchor1
 Anchor2 ->> Tag: Blink Message 
 Note right of Tag: Anchor2 announces himself to Tag. Tag extracts x,y(Configured static in Anchor ) ,distance ( last measurement )  from blink Message. Tag will include Anchor2 in polling.
+Activate Tag
+Note right of Tag : Tag has the x,y,distance for each Anchor, so can calculate through trilateration the position of itself.Piece of cake (NOT!).  Any Anchors timed out will be removed from polling list
+Deactivate Tag
 ```
 
 
