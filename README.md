@@ -1,10 +1,10 @@
 # vertx-esp8266
-For a complete view : [with UML sequence diagrams](https://vortex314.github.io/vertx-esp8266.html)
+For a complete view : [with UML sequence diagrams](https://vortex314.github.io/vertx-esp8266)
 The purpose is to have a framework for small embedded devices that have the ease of integration and development.
 
 This framework is based on the ideas that also live  in Vertx and Node.js.
 ## Features :
- 1. Loosely coupled and autonomous objects . They have no interface towards each othe except a common eventbus. 
+ 1. Loosely coupled and autonomous objects . They have no interface towards each other except a common eventbus, they are not aware of their existence. The wiring of events is done outside. 
  2. Events have a string signature which is send as a hash for fast correlation between publisher and subscriber. Example :"mqtt/connected" is send to help the programmer remember what he send and received, at compile time only a 16bit int is sued.
  3. An eventbus to send message between different objects 
  4. Eventbus addressing is based on addresses formulated as strings, internally these are converted to unique id's ( 16 bit ) which are more performant to do the routing.
@@ -85,7 +85,24 @@ The property dwm1000.role is used to determine it's role as anchor or tag.
 	anchor3 $ <ctrl-D><enter> closes the connection
 	Connection closed by foreign host.
 ```
+```mermaid
+sequenceDiagram
+participant Tag
+participant Anchor1
+participant Anchor2
+Anchor1 ->> Tag: Blink Message 
+Note right of Tag: Anchor1 announces himself to Tag. Tag extracts x,y(Configured static in Anchor ) ,distance ( last measurement )  from blink Message. Tag will include Anchor1 in polling.
 
+Tag ->> Anchor1: Poll message
+activate Tag
+Activate Anchor1
+Anchor1 ->> Tag: Resp Message ( rx time + fixed delay )
+Tag ->> Anchor1: Final message ( 
+deactivate Tag
+deactivate Anchor1
+Anchor2 ->> Tag: Blink Message 
+Note right of Tag: Anchor2 announces himself to Tag. Tag extracts x,y(Configured static in Anchor ) ,distance ( last measurement )  from blink Message. Tag will include Anchor2 in polling.
+```
 
 
 
