@@ -75,9 +75,9 @@ void Mqtt::start()
 
     VerticleTask::start();
 
-    new PropertyFunction<uint64_t> ("system/upTime",Sys::millis,1000);
+/*    new PropertyFunction<uint64_t> ("system/upTime",Sys::millis,1000);
     new PropertyFunction<uint32_t> ("system/heap",Sys::getFreeHeap,1000);
-    new PropertyReference<bool>("system/alive",alive,1000);
+    new PropertyReference<bool>("system/alive",alive,1000); */
 }
 
 

@@ -29,8 +29,10 @@ git clone --recursive https://github.com/Superhouse/esp-open-rtos.git
 #
 #
 cd vertx-esp8266
+cp ArduinoJson.h ../ArduinoJson/component.mk
 make flash
 echo " you can change config parameters by using telnet to go to the device itself based on IP address or .local name"
+echo " don't forget to set INCLUDE_eTaskGetState to 1 in FreeRTOS.h"
 exit
 #
 # ESP32 

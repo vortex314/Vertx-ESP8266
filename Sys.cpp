@@ -54,6 +54,10 @@ uint64_t Sys::millis()
     return Sys::micros() / 1000;
 }
 
+uint32_t Sys::sec(){
+    return millis()/1000;
+}
+
 IRAM uint64_t Sys::micros()
 {
 

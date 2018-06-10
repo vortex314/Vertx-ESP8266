@@ -52,7 +52,6 @@
     <File Name="Mqtt.cpp"/>
     <File Name="Mqtt.h"/>
     <File Name="RtosBus.cpp"/>
-    <File Name="Sys.cpp"/>
     <File Name="Telnet.cpp"/>
     <File Name="Telnet.h"/>
     <File Name="Uid.cpp"/>
