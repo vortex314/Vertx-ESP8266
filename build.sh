@@ -44,3 +44,6 @@ cd ~/esp
 git clone --recursive https://github.com/espressif/esp-idf.git
 cd ~/esp/esp-idf
 git submodule update --init
+cd ~/esp
+tar -xzf ~/Downloads/xtensa-esp32-elf-linux64-1.22.0-80-g6c4433a-5.2.0.tar.gz
+
