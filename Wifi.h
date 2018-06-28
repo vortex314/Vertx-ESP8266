@@ -18,6 +18,7 @@ class Wifi : public VerticleTask
     Str _pswd;
 	bool _foundAP;
 	static Wifi* _wifi;
+    int _rssi;
 
 public:
     Wifi(const char *name);

@@ -68,7 +68,6 @@ void PropertyVerticle::run()
 //   INFO("%X ",signal());
     PT_BEGIN();
     while(true) {
-        INFO("0");
         while(!_mqttConnected) {
             PT_WAIT(1000);
         }
@@ -79,11 +78,11 @@ void PropertyVerticle::run()
                 if ( (_currentProp->_timeout < Sys::millis()) || _currentProp->hasChanged() ) {
                     sendProp(_currentProp);
 //                   _currentProp=Property::first();
-                    PT_WAIT(1);
+                    PT_WAIT(10);
                 }
                 _currentProp=_currentProp->next();
             }
-            PT_WAIT(1);
+            PT_WAIT(10);
         };
 
     }

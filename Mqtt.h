@@ -32,20 +32,26 @@ class Mqtt : public VerticleTask
     uint8_t _mqtt_readbuf[100];
     mqtt_packet_connect_data_t _data;
     Str _topicAlive;
+	Str _topicsForDevice;
     bool _wifiConnected;
     bool _mqttConnected;
-    Str _topicIncoming;
+    Str _topicRxd;
+	Str _messageRxd;
     Str _topic;
     Str _message;
     Str _topicTxd;
     Str _messageTxd;
+	Message _messageEb;
     bool _busyTxd;
+
 public:
+	static Mqtt* _mqtt;
     Mqtt(const char*);
     void run();
     void start();
     void publish(Str& topic,Str& message);
-
+	static void  topic_received_cb(mqtt_message_data_t *md);
+	void onMessageReceived(Str& topic, Str& payload);
 
 private :
     void mqtt_do_connect();
