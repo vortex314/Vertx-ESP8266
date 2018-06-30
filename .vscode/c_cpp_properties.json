@@ -13,7 +13,8 @@
                 "path": [
                     "/usr/include",
                     "/usr/local/include",
-                    "${workspaceRoot}"
+                    "${workspaceRoot}",
+                    "/home/lieven"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""
@@ -42,7 +43,10 @@
                 "/home/lieven/workspace/esp-open-rtos/lwip/lwip/src/include/posix",
                 "/home/lieven/workspace/esp-open-rtos/lwip/lwip/src/include/lwip",
                 "/home/lieven/workspace/esp-open-rtos/lwip/lwip/src/include",
-                "/home/lieven/workspace/Common"
+                "/home/lieven/workspace/Common",
+                "/home/lieven/workspace/DWM1000",
+                "/home/lieven/workspace/ArduinoJson",
+                "/home/lieven/workspace/esp-open-sdk/lx106-hal/include"
             ],
             "defines": [],
             "intelliSenseMode": "clang-x64",
@@ -64,7 +68,8 @@
                     "/home/lieven/workspace/esp-open-rtos/lwip/lwip/src/include/lwip",
                     "/home/lieven/workspace/esp-open-rtos/lwip/lwip/src/include",
                     "/home/lieven/workspace/Common",
-                    "/home/lieven/workspace/Ebos"
+                    "/home/lieven/workspace/ArduinoJson",
+                    "/home/lieven/workspace/esp-open-sdk/lx106-hal/include"
                 ],
                 "limitSymbolsToIncludedHeaders": true,
                 "databaseFilename": ""

@@ -35,20 +35,20 @@ extern "C" {
 
 void Tftp::start()
 {
-    rboot_config conf = rboot_get_config();
-    INFO("OTA Basic demo.Currently running on flash slot %d / %d.",
-         conf.current_rom, conf.count);
-    int slot = (conf.current_rom + 1) % conf.count;
-    INFO("Image will be saved in OTA slot %d.", slot);
-    if(slot == conf.current_rom) {
-        INFO("FATAL ERROR: Only one OTA slot is configured!");
-        while(1) {}
-    }
-    INFO("Image addresses in flash:");
-    for(int i = 0; i <conf.count; i++) {
-        INFO("%c%d: offset 0x%08x", i == conf.current_rom ? '*':' ', i, conf.roms[i]);
-    }
-    INFO("Starting TFTP server...");
-    ota_tftp_init_server(TFTP_PORT);
+	rboot_config conf = rboot_get_config();
+	INFO("OTA Basic demo.Currently running on flash slot %d / %d.",
+	     conf.current_rom, conf.count);
+	int slot = (conf.current_rom + 1) % conf.count;
+	INFO("Image will be saved in OTA slot %d.", slot);
+	if(slot == conf.current_rom) {
+		INFO("FATAL ERROR: Only one OTA slot is configured!");
+		while(1) {}
+	}
+	INFO("Image addresses in flash:");
+	for(int i = 0; i <conf.count; i++) {
+		INFO("%c%d: offset 0x%08x", i == conf.current_rom ? '*':' ', i, conf.roms[i]);
+	}
 
+	INFO("Starting TFTP server...");
+	ota_tftp_init_server(TFTP_PORT);
 }

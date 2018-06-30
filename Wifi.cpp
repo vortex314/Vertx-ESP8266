@@ -4,9 +4,14 @@
 #include <Config.h>
 #include <Property.h>
 
+
 Wifi *Wifi::_wifi = 0; // system sigleton, needed in callback
 
-Wifi::Wifi(const char *name) : VerticleTask(name, 500, 6), _ssid(30), _ssidPattern(30), _pswd(40)
+Wifi::Wifi(const char *name) : VerticleTask(name, 500, 6)
+	, _ssid(30)
+	, _ssidPattern(30)
+	, _pswd(40)
+	,_ipAddress(20)
 {
 	_wifi = this;
 	_foundAP = false;
@@ -24,6 +29,7 @@ void Wifi::start()
 	},
 	4000);
 	new PropertyReference<int>("wifi/rssi", _rssi, 5000);
+	new PropertyReference<Str>("wifi/ipAddress", _ipAddress, 5000);
 
 	VerticleTask::start();
 }
@@ -59,6 +65,47 @@ static const char *const auth_modes[] = {
 	[AUTH_WPA2_PSK] = "WPA2/PSK",
 	[AUTH_WPA_WPA2_PSK] = "WPA/WPA2/PSK"
 };
+/*
+void	Wifi::wifi_handle_event_cb(System_Event_t	*evt)
+{
+	os_printf("event	%x\n",	evt->event);
+	switch	(evt->event)	{
+	case	EVENT_STAMODE_CONNECTED:
+		os_printf("connect	to	ssid	%s,	channel	%d\n",
+		          evt->event_info.connected.ssid,
+		          evt->event_info.connected.channel);
+		break;
+	case	EVENT_STAMODE_DISCONNECTED:
+		os_printf("disconnect	from	ssid	%s,	reason	%d\n",
+		          evt->event_info.disconnected.ssid,
+		          evt->event_info.disconnected.reason);
+		break;
+	case	EVENT_STAMODE_AUTHMODE_CHANGE:
+		os_printf("mode:	%d	->	%d\n",
+		          evt->event_info.auth_change.old_mode,
+		          evt->event_info.auth_change.new_mode);
+		break;
+	case	EVENT_STAMODE_GOT_IP:
+		os_printf("ip:"	IPSTR	",mask:"	IPSTR	",gw:"	IPSTR,
+		          IP2STR(&evt->event_info.got_ip.ip),
+		          IP2STR(&evt->event_info.got_ip.mask),
+		          IP2STR(&evt->event_info.got_ip.gw));
+		os_printf("\n");
+		break;
+	case	EVENT_SOFTAPMODE_STACONNECTED:
+		os_printf("station:	"	MACSTR	"join,	AID	=	%d\n",
+		          MAC2STR(evt->event_info.sta_connected.mac),
+		          evt->event_info.sta_connected.aid);
+		break;
+	case	EVENT_SOFTAPMODE_STADISCONNECTED:
+		os_printf("station:	"	MACSTR	"leave,	AID	=	%d\n",
+		          MAC2STR(evt->event_info.sta_disconnected.mac),
+		          evt->event_info.sta_disconnected.aid);
+		break;
+	default:
+		break;
+	}
+}*/
 
 void Wifi::scan_done_cb(void *arg, sdk_scan_status_t status)
 {
@@ -127,18 +174,31 @@ DISCONNECTED: {
 			INFO("WiFi: disconnected");
 			eb.publish("wifi/disconnected");
 			while (true) {
-				retries = 5;
+				retries = 10;
 				sdk_wifi_station_disconnect();
 				netif_set_hostname(netif_default, Sys::hostname());
 				sdk_wifi_set_opmode(STATION_MODE);
 				sdk_wifi_station_set_config(&_config);
+//				sdk_wifi_set_event_hander_cb(wifi_handle_event_cb);
+
 				sdk_wifi_station_connect();
 
 				//               startAP();
 				while (true) {
 					status = sdk_wifi_station_get_connect_status();
-					if (status == STATION_GOT_IP)
+					if (status == STATION_GOT_IP) {
+						ip_info ipInfo;
+						if ( sdk_wifi_get_ip_info(STATION_IF,&ipInfo)) {
+							_ipAddress.clear();
+							for(int i=0; i<4; i++ ) {
+								if ( i) _ipAddress+=".";
+								_ipAddress.append(((uint8_t*)&ipInfo.ip.addr)[i]);
+							}
+							INFO(" ip info %s",_ipAddress.c_str());
+						}
 						goto CONNECTED;
+
+					}
 					INFO("Wifi status =%d , retries left: %d", status, retries);
 					if (status == STATION_WRONG_PASSWORD) {
 						INFO("WiFi: wrong password");

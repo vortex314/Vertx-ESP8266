@@ -8,6 +8,7 @@
 #include "espressif/esp_common.h"
 #include <espressif/esp_sta.h>
 #include <espressif/esp_wifi.h>
+#include <espressif/esp_sta.h>
 
 class Wifi : public VerticleTask
 {
@@ -16,6 +17,7 @@ class Wifi : public VerticleTask
 	Str _ssidPattern;
     Str  _ssid;
     Str _pswd;
+	Str _ipAddress;
 	bool _foundAP;
 	static Wifi* _wifi;
     int _rssi;
@@ -25,6 +27,8 @@ public:
     void start();
     void run();
 	static void scan_done_cb(void *arg, sdk_scan_status_t status);
+//	static void	wifi_handle_event_cb(System_Event_t	*evt);
+
 	void scan();
 };
 #endif

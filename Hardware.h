@@ -5,15 +5,14 @@
 
 class Bytes;
 
-
-
 typedef void (*FunctionPointer)(void *);
 
 typedef unsigned int uint32_t;
 typedef uint32_t Erc;
 typedef unsigned char uint8_t;
 typedef uint32_t PhysicalPin;
-typedef enum {
+typedef enum
+{
     LP_TXD = 0,
     LP_RXD,
     LP_SCL,
@@ -26,14 +25,14 @@ typedef enum {
 
 class Driver
 {
-public:
+  public:
     virtual Erc init() = 0;
     virtual Erc deInit() = 0;
 };
 
 class UART : public Driver
 {
-public:
+  public:
     static UART &create(PhysicalPin txd, PhysicalPin rxd);
     virtual Erc init() = 0;
     virtual Erc deInit() = 0;
@@ -53,13 +52,15 @@ public:
 
 class DigitalIn : public Driver
 {
-public:
-    typedef enum { DIN_NONE,
-                   DIN_RAISE,
-                   DIN_FALL,
-                   DIN_CHANGE
-                 } PinChange;
-    static DigitalIn& create(PhysicalPin pin);
+  public:
+    typedef enum
+    {
+        DIN_NONE,
+        DIN_RAISE,
+        DIN_FALL,
+        DIN_CHANGE
+    } PinChange;
+    static DigitalIn &create(PhysicalPin pin);
     virtual int read() = 0;
     virtual Erc init() = 0;
     virtual Erc deInit() = 0;
@@ -69,12 +70,12 @@ public:
 //===================================================== GPIO DigitalOut
 class DigitalOut : public Driver
 {
-public:
-    static DigitalOut& create(PhysicalPin pin);
-    virtual Erc init()=0;
-    virtual Erc deInit()=0;
-    virtual Erc write(int)=0;
-    virtual PhysicalPin getPin()=0;
+  public:
+    static DigitalOut &create(PhysicalPin pin);
+    virtual Erc init() = 0;
+    virtual Erc deInit() = 0;
+    virtual Erc write(int) = 0;
+    virtual PhysicalPin getPin() = 0;
 };
 //===================================================== I2C ===
 
@@ -83,7 +84,7 @@ public:
 
 class I2C : public Driver
 {
-public:
+  public:
     static I2C &create(PhysicalPin scl, PhysicalPin sda);
     ~I2C();
     virtual Erc init() = 0;
@@ -97,22 +98,25 @@ public:
 
 class Spi : public Driver
 {
-public:
-    typedef enum {  SPI_MODE_PHASE0_POL0 =0,
-                    SPI_MODE_PHASE1_POL0= 1,
-                    SPI_MODE_PHASE0_POL1= 2,
-                    SPI_MODE_PHASE1_POL1= 3
-                 } SpiMode;
-    typedef enum {
-        SPI_CLOCK_125K=125000,
-        SPI_CLOCK_250K=250000,
-        SPI_CLOCK_500K=500000,
-        SPI_CLOCK_1M=1000000,
-        SPI_CLOCK_2M=2000000,
-        SPI_CLOCK_4M=4000000,
-        SPI_CLOCK_8M=8000000,
-        SPI_CLOCK_10M=10000000,
-        SPI_CLOCK_20M=20000000
+  public:
+    typedef enum
+    {
+        SPI_MODE_PHASE0_POL0 = 0,
+        SPI_MODE_PHASE1_POL0 = 1,
+        SPI_MODE_PHASE0_POL1 = 2,
+        SPI_MODE_PHASE1_POL1 = 3
+    } SpiMode;
+    typedef enum
+    {
+        SPI_CLOCK_125K = 125000,
+        SPI_CLOCK_250K = 250000,
+        SPI_CLOCK_500K = 500000,
+        SPI_CLOCK_1M = 1000000,
+        SPI_CLOCK_2M = 2000000,
+        SPI_CLOCK_4M = 4000000,
+        SPI_CLOCK_8M = 8000000,
+        SPI_CLOCK_10M = 10000000,
+        SPI_CLOCK_20M = 20000000
     } SpiClock;
 
     static Spi &create(PhysicalPin miso, PhysicalPin mosi, PhysicalPin sck,
@@ -125,14 +129,14 @@ public:
     virtual Erc setClock(uint32_t) = 0;
     virtual Erc setMode(SpiMode) = 0;
     virtual Erc setLsbFirst(bool) = 0;
-    virtual Erc setHwSelect(bool)=0;
+    virtual Erc setHwSelect(bool) = 0;
 };
 
 class ADC
 {
     uint32_t _pin;
 
-public:
+  public:
     ADC(uint32_t pin);
     Erc init();
     float getValue();
@@ -147,7 +151,7 @@ class Connector
     Spi *_spi;
     I2C *_i2c;
 
-private:
+  private:
     uint32_t toPin(uint32_t logicalPin);
     void lockPin(LogicalPin);
     bool isUsedPin(LogicalPin lp)
@@ -156,7 +160,7 @@ private:
     }
     void freePin(LogicalPin);
 
-public:
+  public:
     Connector(uint32_t idx);
     UART &getUART();
     Spi &getSpi();
@@ -166,7 +170,5 @@ public:
     ADC &getADC();
     // PWM& getPWM();
 };
-
-
 
 #endif
