@@ -74,7 +74,6 @@
     <File Name="Property.cpp"/>
     <File Name="Mdns.h"/>
     <File Name="Mdns.cpp"/>
-    <File Name="esp_log.h"/>
     <File Name="SpiVerticle.cpp"/>
     <File Name="SpiVerticle.h"/>
     <File Name="Tftp.h"/>

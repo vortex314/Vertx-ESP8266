@@ -44,7 +44,7 @@ void Monitor::run()
         INFO(" freeRTOS heap : %d  heap SDK : %d ", xPortGetFreeHeapSize(), sdk_system_get_free_heap_size());
         INFO(" Address  | S |   TASK     |  STACK | prio");
         INFO("----------|---|------------|--------|-------");
-        for (Verticle *v = first(); v != 0; v = v->next()) {
+        Verticle::_verticles.forEach([=](Verticle* v) {
             if (v->isTask()) {
                 VerticleTask* vt = (VerticleTask*)v;
                 TaskHandle_t th=vt->getHandle();
@@ -57,17 +57,18 @@ void Monitor::run()
                          uxTaskPriorityGet(th));
                 if ( uxTaskGetStackHighWaterMark(th) < _lowestStack ) _lowestStack = uxTaskGetStackHighWaterMark(th);
             }
-        }
+        });
+
         INFO(" Address  | S |   TASK     |  timeout | signals");
         INFO("----------|---|------------|----------|-------");
-        for (Verticle *v = first(); v != 0; v = v->next()) {
+        Verticle::_verticles.forEach([=](Verticle* v) {
             if (!v->isTask()) {
 
-                VerticleCoRoutine *vc = (VerticleCoRoutine *)v;
-                INFO(" %8X | - | %10s |  %8ld  | %X", vc,
+                VerticleCoRoutine* vc = (VerticleCoRoutine*)v;
+                INFO(" %8X | - | %10s |  %8ld  | %X", &vc,
                      vc->name(),vc->timeout(),vc->signal());
             }
-        }
+        });
     }
     PT_END();
 }

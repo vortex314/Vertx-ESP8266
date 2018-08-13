@@ -22,9 +22,11 @@
 
 class Verticle;
 
-class Verticle : public LinkedList<Verticle>
+class Verticle
 {
+
 public:
+    static LinkedList<Verticle*> _verticles;
     virtual const char *name()
     {
         return "ERRORE!";
@@ -208,7 +210,7 @@ class Timer
     bool _repeat;
     bool _active;
     TimerHandler _action;
-    
+
 public:
     Timer();
     ~Timer();

@@ -6,7 +6,7 @@ VerticleCoRoutine::VerticleCoRoutine(const char *name) : Verticle()
 {
     _name = new char[strlen(name) + 1];
     strcpy(_name, name);
-    add(this);
+    _verticles.add(this);
     __timeout=0;
 }
 const char *VerticleCoRoutine::name()

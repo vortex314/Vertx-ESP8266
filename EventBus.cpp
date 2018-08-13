@@ -1,15 +1,20 @@
 #include <vertx.h>
 
-class Consumer : public LinkedList<Consumer>
+class Consumer
 {
+
 public:
+    static LinkedList<Consumer*> _consumers;
     uid_t _eventUid;
     EventHandler _handler;
 
-    Consumer(uid_t eventUid,EventHandler handler) : _eventUid(eventUid),_handler(handler) {
-        add(this);
+    Consumer(uid_t eventUid,EventHandler handler) : _eventUid(eventUid),_handler(handler)
+    {
+        _consumers.add(this);
     };
 };
+
+LinkedList<Consumer*> Consumer::_consumers;
 
 namespace std
 {
@@ -71,10 +76,10 @@ void EventBus::eventLoop()
     taskEXIT_CRITICAL(  );
 
     if ( erc ==0  && _rxd.get(EB_DST,uidDst) ) {
-        for(consumer=Consumer::first(); consumer; consumer=consumer->next()) {
+        Consumer::_consumers.forEach([uidDst](Consumer* consumer){
             if ( uidDst == consumer->_eventUid) {
                 consumer->_handler(_rxd);
             }
-        }
+        });
     }
 }

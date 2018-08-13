@@ -54,12 +54,14 @@ class CoRoutineTask : public VerticleTask
 
 public:
     CoRoutineTask(const char *name)
-        : VerticleTask(name, 600, 1) {
+        : VerticleTask(name, 600, 1)
+    {
     }
-    void run() {
+    void run()
+    {
         while (true) {
             eb.eventLoop(); // handle incoming messages first
-            for(Verticle* pv = Verticle::first(); pv; pv=pv->next()) {
+            Verticle::_verticles.forEach([](Verticle* pv) {
                 if ( !pv->isTask()) {
                     VerticleCoRoutine* pvcr = (VerticleCoRoutine*)pv;
                     if ( Sys::millis() >  pvcr->timeout() ) pvcr->signal(SIGNAL_TIMER); // set timeout if needed
@@ -67,7 +69,7 @@ public:
                         pvcr->run();
                     }
                 }
-            }
+            });
         }
     }
 };
@@ -81,12 +83,15 @@ class Task : public VerticleTask
 {
 public:
     Task(const char *name)
-        : VerticleTask(name, 256, 3) {
+        : VerticleTask(name, 256, 3)
+    {
     }
-    void start() {
+    void start()
+    {
         VerticleTask::start();
     }
-    void run() {
+    void run()
+    {
         while (true) {
             waitSignal(1000);
             //            EventBus::eventLoop();
@@ -121,10 +126,12 @@ class DummyVerticle : public VerticleCoRoutine
 {
     uint32_t _interval;
 public:
-    DummyVerticle(const char* name):VerticleCoRoutine(name) {
+    DummyVerticle(const char* name):VerticleCoRoutine(name)
+    {
 
     }
-    void start() {
+    void start()
+    {
         eb.on("wifi/disconnected",[this](Message& evt) {
             _interval=100;
             INFO(" interval : %d",_interval);
@@ -135,7 +142,8 @@ public:
         });
         VerticleCoRoutine::start();
     }
-    void run() {
+    void run()
+    {
         PT_BEGIN();
         for (;;) {
             PT_WAIT_SIGNAL(10000);
@@ -197,11 +205,13 @@ extern "C" void user_init(void)
         anchor->setLongAddress(un.mac);
     }
 
+INFO("______________1");
 
-    Verticle* pv;
-    for(pv=Verticle::first(); pv; pv=pv->next())
-        pv->start();
-
+    Verticle::_verticles.forEach([](Verticle* v ) {
+        INFO("Starting verticle '%s' ...",v->name());
+        v->start();
+    });
+INFO("______________2");
     config.save();
 
     eb.on("wifi/connected", [](Message& evt) {

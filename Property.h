@@ -4,10 +4,12 @@
 #include <vertx.h>
 //#include <memory.h>
 #include <ArduinoJson.h>
+#include <Log.h>
 
-class Property : public LinkedList<Property>
+class Property  
 {
 public:
+    static LinkedList<Property*> _properties;
 	uint64_t _timeout;
 	uid_t _uid;
 	uint32_t _interval;
@@ -55,6 +57,9 @@ public:
 	{
 		return _uid;
 	};
+    static void add(Property* p) {
+        _properties.add(p);
+    }
 
 };
 

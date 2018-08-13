@@ -1,5 +1,7 @@
 #include <vertx.h>
 
+LinkedList<Verticle*> Verticle::_verticles;
+
 VerticleTask::VerticleTask(const char *name, uint16_t stack, uint8_t priority)
 {
     // _next = 0;
@@ -12,7 +14,7 @@ VerticleTask::VerticleTask(const char *name, uint16_t stack, uint8_t priority)
     INFO(" name : %s : %X ", _name, this);
     _nextEvent = 8;
     INFO(" VerticleTask : %s = 0x%X", _name, this);
-    add(this);
+    _verticles.add(this);
     // LinkedList<Verticle>::add(this);
     xTimerCreate("mqtt",1000,pdTRUE,this,timerHandler);
 };
